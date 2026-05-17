@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>場域 — 藝饗台南 2.0</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+/* HERO */
+.spot-hero {
+  position: relative;
+  min-height: 380px;
+  display: flex; align-items: flex-end;
+  color: var(--cream);
+  overflow: hidden;
+}
+.spot-hero-bg {
+  position: absolute; inset: 0;
+  background-size: cover;
+  background-position: center;
+}
+.spot-hero-bg::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to top, oklch(15% 0.02 50 / 0.85), oklch(15% 0.02 50 / 0.4) 50%, oklch(15% 0.02 50 / 0.5));
+}
+.spot-hero-content {
+  position: relative; z-index: 2;
+  padding: 56px 0;
+  width: 100%;
+}
+.spot-hero-eyebrow {
+  font-size: 11px; letter-spacing: 0.22em;
+  color: var(--gold);
+  margin-bottom: 14px;
+  display: inline-flex; align-items: center; gap: 10px;
+}
+.spot-hero-eyebrow::before { content: ''; width: 30px; height: 1px; background: var(--gold); }
+.spot-hero-title {
+  font-family: var(--font-serif);
+  font-size: clamp(36px,5vw,56px);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  margin-bottom: 12px;
+}
+.spot-hero-meta {
+  display: flex; gap: 14px; flex-wrap: wrap;
+  font-size: 13px;
+  color: oklch(90% 0.02 75);
+}
+.spot-hero-meta .chip-i {
+  background: oklch(100% 0 0 / 0.15);
+  padding: 4px 12px; border-radius: 14px;
+  border: 1px solid oklch(100% 0 0 / 0.2);
+}
+
+/* LAYOUT */
+.spot-main {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 48px;
+  padding: 48px 0;
+}
+@media (max-width: 1000px) { .spot-main { grid-template-columns: 1fr; gap: 32px; } }
+
+/* SECTIONS */
+.s-block {
+  background: white;
+  border-radius: var(--radius-md);
+  padding: 32px;
+  margin-bottom: 24px;
+  border: 1px solid var(--border-soft);
+}
+.s-block h2 {
+  font-family: var(--font-serif);
+  font-size: 22px; font-weight: 700;
+  color: var(--ink);
+  letter-spacing: 0.04em;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-soft);
+  display: flex; align-items: center; gap: 10px;
+}
+.s-block h2 .icon { font-size: 22px; }
+.s-text { color: var(--ink-soft); line-height: 1.9; font-size: 15px; }
+.s-text p + p { margin-top: 14px; }
+
+/* FEATURES */
+.features {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+}
+@media (max-width: 700px) { .features { grid-template-columns: 1fr; } }
+.feature-cell {
+  background: var(--cream);
+  border-left: 3px solid var(--gold);
+  padding: 14px 18px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.feature-t {
+  font-family: var(--font-serif);
+  font-size: 14px; font-weight: 700;
+  color: var(--coffee-dark);
+  margin-bottom: 4px;
+}
+.feature-d { font-size: 12px; color: var(--ink-mute); line-height: 1.6; }
+
+/* NPC CARD (英雄角色卡) */
+.npc-card {
+  background: linear-gradient(135deg, var(--coffee), var(--coffee-dark));
+  color: var(--cream);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  position: relative; overflow: hidden;
+  margin-bottom: 24px;
+  border: 1px solid oklch(50% 0.04 60);
+}
+.npc-card::before {
+  content: ''; position: absolute;
+  top: -50px; right: -50px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, oklch(70% 0.12 78 / 0.18), transparent 70%);
+}
+.npc-eyebrow {
+  font-size: 11px; letter-spacing: 0.22em;
+  color: var(--gold);
+  margin-bottom: 14px;
+}
+.npc-row {
+  display: flex; gap: 20px; align-items: center;
+  margin-bottom: 18px;
+  position: relative;
+}
+.npc-avatar {
+  width: 76px; height: 76px;
+  background: var(--gold);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 38px;
+  border: 3px solid var(--gold-light);
+  box-shadow: 0 4px 16px oklch(0% 0 0 / 0.3);
+  flex-shrink: 0;
+}
+.npc-name {
+  font-family: var(--font-serif);
+  font-size: 20px; font-weight: 700;
+  color: var(--cream);
+  margin-bottom: 4px;
+}
+.npc-role { font-size: 12px; color: var(--gold-light); letter-spacing: 0.06em; }
+.npc-intro {
+  background: oklch(100% 0 0 / 0.07);
+  border-left: 3px solid var(--gold);
+  padding: 14px 18px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 14px;
+  line-height: 1.8;
+  font-family: var(--font-serif);
+  font-style: italic;
+  position: relative;
+  color: oklch(90% 0.03 75);
+}
+
+/* QR SCAN BUTTON */
+.qr-cta {
+  background: white;
+  border: 2px dashed var(--brick);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+.qr-icon {
+  width: 80px; height: 80px;
+  margin: 0 auto 12px;
+  background: var(--ink);
+  border-radius: var(--radius-sm);
+  padding: 8px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(7, 1fr);
+  gap: 1px;
+}
+.qr-icon span { background: var(--ink); }
+.qr-icon span.on { background: white; }
+.qr-title {
+  font-family: var(--font-serif);
+  font-size: 18px; font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.qr-sub { font-size: 12px; color: var(--ink-mute); margin-bottom: 16px; }
+
+/* unlocked status */
+.unlocked-banner {
+  background: oklch(95% 0.05 145);
+  border: 1px solid var(--green);
+  color: var(--green-deep);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  font-size: 13px;
+  margin-bottom: 20px;
+  display: flex; align-items: center; gap: 10px;
+}
+
+/* SIDEBAR */
+.sidebar { display: flex; flex-direction: column; gap: 20px; position: sticky; top: 92px; height: max-content; }
+@media (max-width: 1000px) { .sidebar { position: static; } }
+.sb-card {
+  background: white;
+  border-radius: var(--radius-md);
+  padding: 22px;
+  border: 1px solid var(--border-soft);
+}
+.sb-card h3 {
+  font-family: var(--font-serif);
+  font-size: 15px; font-weight: 700;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-soft);
+  display: flex; align-items: center; gap: 8px;
+  color: var(--coffee-dark);
+}
+#mini-map { height: 200px; border-radius: var(--radius-sm); }
+
+.sb-info-row {
+  display: flex; justify-content: space-between;
+  padding: 8px 0;
+  font-size: 13px;
+  border-bottom: 1px dashed var(--border-soft);
+}
+.sb-info-row:last-child { border: none; }
+.sb-info-row .label { color: var(--ink-mute); }
+.sb-info-row .val { font-weight: 600; color: var(--ink); }
+
+.task-summary {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  margin-bottom: 14px;
+}
+.task-stat {
+  background: var(--cream);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  text-align: center;
+}
+.task-stat-num { font-family: var(--font-serif); font-size: 22px; font-weight: 700; color: var(--brick); }
+.task-stat-label { font-size: 10px; color: var(--coffee); letter-spacing: 0.08em; margin-top: 2px; }
+
+/* DIY card */
+.diy-card {
+  background: oklch(96% 0.04 80);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  border: 1px solid var(--gold-deep);
+  text-align: center;
+}
+.diy-card-icon { font-size: 32px; margin-bottom: 8px; }
+.diy-card-title { font-family: var(--font-serif); font-size: 15px; font-weight: 700; color: var(--coffee-dark); margin-bottom: 6px; }
+.diy-card-desc { font-size: 12px; color: var(--coffee); margin-bottom: 12px; line-height: 1.6; }
+
+/* TICKET */
+.spot-ticket {
+  background: var(--cream);
+  border: 1.5px dashed var(--coffee);
+  border-radius: var(--radius-sm);
+  padding: 16px 18px;
+  display: flex; align-items: center; gap: 16px;
+  margin-top: 18px;
+}
+.spot-ticket-num {
+  font-family: var(--font-serif);
+  font-size: 28px; font-weight: 700;
+  color: var(--brick);
+  line-height: 1;
+  padding-right: 18px;
+  border-right: 1px dashed var(--coffee);
+}
+.spot-ticket-body { flex: 1; font-size: 13px; }
+
+/* MODAL */
+.modal-back {
+  position: fixed; inset: 0; z-index: 1000;
+  background: oklch(15% 0.01 50 / 0.65);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.modal-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  width: 100%; max-width: 460px;
+  padding: 32px;
+  text-align: center;
+  position: relative;
+  box-shadow: var(--shadow-lg);
+  animation: scaleIn 0.3s ease;
+}
+@keyframes scaleIn {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.modal-close {
+  position: absolute; top: 14px; right: 14px;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--cream-mid); border: none;
+  font-size: 16px; cursor: pointer; color: var(--coffee);
+}
+.scan-anim {
+  width: 200px; height: 200px;
+  margin: 0 auto 20px;
+  position: relative;
+  background: var(--ink); border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.scan-anim-qr {
+  width: 140px; height: 140px;
+  background:
+    linear-gradient(white 4px, transparent 4px 8px, white 8px) 0 0/100% 12px,
+    linear-gradient(90deg, white 4px, transparent 4px 8px, white 8px) 0 0/12px 100%;
+  opacity: 0.92;
+}
+.scan-line {
+  position: absolute; left: 0; right: 0;
+  height: 2px; background: var(--gold);
+  box-shadow: 0 0 12px var(--gold);
+  animation: scanmove 1.5s ease-in-out infinite;
+}
+@keyframes scanmove {
+  0%, 100% { top: 12%; } 50% { top: 88%; }
+}
+</style>
+</head>
+<body>
+
+<div id="nav-mount"></div>
+
+<!-- HERO -->
+<section class="spot-hero" id="hero">
+  <div class="spot-hero-bg ph" id="hero-bg"></div>
+  <div class="spot-hero-content">
+    <div class="container">
+      <a href="../explore.html" class="back-btn" style="color:var(--cream); margin-bottom:18px;">回到場域列表</a>
+      <div id="hero-content"></div>
+    </div>
+  </div>
+</section>
+
+<!-- MAIN -->
+<div class="container">
+  <div class="spot-main">
+
+    <!-- LEFT: Content -->
+    <div>
+      <!-- NPC Card -->
+      <div id="npc-card"></div>
+
+      <!-- QR Scan CTA -->
+      <div id="qr-area"></div>
+
+      <!-- 場域簡介 -->
+      <div class="s-block">
+        <h2><span class="icon">📖</span>場域故事</h2>
+        <div class="s-text" id="long-desc"></div>
+      </div>
+
+      <!-- 文化特色 -->
+      <div class="s-block">
+        <h2><span class="icon">✨</span>文化特色</h2>
+        <div class="features" id="features"></div>
+      </div>
+
+      <!-- 任務預覽 -->
+      <div class="s-block">
+        <h2><span class="icon">📋</span>NPC 任務清單</h2>
+        <p style="font-size:13px; color:var(--ink-mute); margin-bottom:18px;">解鎖場域後，依序完成以下任務即可累積點數並取得徽章。</p>
+        <div id="task-preview"></div>
+      </div>
+
+      <!-- 周邊店家 -->
+      <div class="s-block">
+        <h2><span class="icon">🍜</span>周邊合作店家</h2>
+        <p style="font-size:13px; color:var(--ink-mute); margin-bottom:16px;">完成任務後可使用兌換的優惠券抵用。</p>
+        <div id="shops"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Sidebar -->
+    <aside class="sidebar">
+      <!-- Mini Map -->
+      <div class="sb-card">
+        <h3>📍 場域位置</h3>
+        <div id="mini-map"></div>
+        <div style="margin-top:10px; font-size:12px; color:var(--ink-mute);" id="address"></div>
+        <a id="map-link" target="_blank" class="btn btn-primary btn-block btn-sm" style="margin-top:12px;">Google 地圖導航 ›</a>
+      </div>
+
+      <!-- Stats -->
+      <div class="sb-card">
+        <h3>🎯 任務進度</h3>
+        <div class="task-summary" id="task-summary"></div>
+        <a href="#qr-area" onclick="document.getElementById('qr-area').scrollIntoView({behavior:'smooth'})" class="btn btn-coffee btn-block btn-sm">前往掃描 QR</a>
+      </div>
+
+      <!-- Basic Info -->
+      <div class="sb-card">
+        <h3>ℹ️ 場域資訊</h3>
+        <div id="sb-info"></div>
+      </div>
+
+      <!-- DIY booking -->
+      <div class="diy-card">
+        <div class="diy-card-icon">🎨</div>
+        <div class="diy-card-title">DIY 手作體驗預約</div>
+        <div class="diy-card-desc" id="diy-desc"></div>
+        <button class="btn btn-gold btn-block btn-sm" onclick="openDIY()">預約體驗 ›</button>
+      </div>
+
+      <!-- Nearby spots -->
+      <div class="sb-card">
+        <h3>🗺 其他主題場域</h3>
+        <div id="nearby"></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<div id="footer-mount"></div>
+
+<!-- Modals mount -->
+<div id="modal-mount"></div>
+
+<script src="../app.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ── Identify which spot ───────────────────────────
+// Use the filename (without .html) as the spot id
+const SPOT_ID = (location.pathname.split('/').pop() || '').replace('.html', '') || new URLSearchParams(location.search).get('id');
+const spot = APP.getSpot(SPOT_ID);
+if (!spot) {
+  document.body.innerHTML = '<div style="padding:60px;text-align:center;font-family:serif;">找不到此場域 · <a href="../explore.html">返回</a></div>';
+  throw new Error('Unknown spot: ' + SPOT_ID);
+}
+
+// Title
+document.title = `${spot.name} · ${spot.theme} — 藝饗台南 2.0`;
+
+// Mount
+document.getElementById('nav-mount').innerHTML = APP.renderNav('explore', '../');
+document.getElementById('footer-mount').innerHTML = APP.renderFooter('../');
+
+// Hero
+document.getElementById('hero-bg').className = `spot-hero-bg ph ph-${spot.id}`;
+document.getElementById('hero-bg').style.background = spot.palette ? `linear-gradient(135deg, ${spot.palette}, oklch(40% 0.08 50))` : '';
+document.getElementById('hero-content').innerHTML = `
+  <div class="spot-hero-eyebrow">${spot.theme.toUpperCase()} · 主題場景</div>
+  <h1 class="spot-hero-title">${spot.name}</h1>
+  <div class="spot-hero-meta">
+    <div class="chip-i">${spot.theme}</div>
+    <div class="chip-i">${spot.era}</div>
+    <div class="chip-i">⏱ ${spot.duration}</div>
+    <div class="chip-i">🏅 ${spot.badge}</div>
+  </div>
+`;
+
+// NPC
+document.getElementById('npc-card').innerHTML = `
+  <div class="npc-card">
+    <div class="npc-eyebrow">CHARACTER · NPC 角色</div>
+    <div class="npc-row">
+      <div class="npc-avatar">${spot.npc.avatar}</div>
+      <div>
+        <div class="npc-name">${spot.npc.name}</div>
+        <div class="npc-role">${spot.npc.role}</div>
+      </div>
+    </div>
+    <div class="npc-intro">「${spot.npc.intro}」</div>
+  </div>
+`;
+
+// QR Area (changes based on unlock state)
+function renderQR() {
+  const s = APP.loadState();
+  const unlocked = !!s.unlockedSpots[spot.id];
+  // build random-ish QR pattern
+  const cells = Array.from({length: 49}, () => Math.random() > 0.5 ? '<span class="on"></span>' : '<span></span>').join('');
+  if (unlocked) {
+    document.getElementById('qr-area').innerHTML = `
+      <div class="unlocked-banner">
+        <span style="font-size:18px;">✅</span>
+        <span>場域已解鎖！可前往任務頁完成 NPC 互動。</span>
+        <a href="../task.html?spot=${spot.id}" class="btn btn-primary btn-sm" style="margin-left:auto;">前往任務 ›</a>
+      </div>
+    `;
+  } else {
+    document.getElementById('qr-area').innerHTML = `
+      <div class="qr-cta">
+        <div class="qr-icon">${cells}</div>
+        <div class="qr-title">抵達場域，掃描 QR Code 解鎖任務</div>
+        <div class="qr-sub">實際使用時請以手機相機掃描入口處 QR Code · 目前為模擬版本</div>
+        <button class="btn btn-primary" onclick="simulateScan()">模擬掃描 QR Code →</button>
+      </div>
+    `;
+  }
+}
+renderQR();
+
+function simulateScan() {
+  document.getElementById('modal-mount').innerHTML = `
+    <div class="modal-back" onclick="if(event.target===this){this.remove()}">
+      <div class="modal-card">
+        <div class="scan-anim">
+          <div class="scan-anim-qr"></div>
+          <div class="scan-line"></div>
+        </div>
+        <h3 style="font-family:var(--font-serif); font-size:20px; margin-bottom:8px;">正在掃描 QR Code…</h3>
+        <p style="font-size:13px; color:var(--ink-mute); margin-bottom:24px;">辨識 ${spot.name} 場域編碼中…</p>
+      </div>
+    </div>
+  `;
+  setTimeout(() => {
+    APP.unlockSpot(spot.id);
+    document.getElementById('modal-mount').innerHTML = `
+      <div class="modal-back" onclick="if(event.target===this){this.remove()}">
+        <div class="modal-card">
+          <button class="modal-close" onclick="this.parentElement.parentElement.remove()">✕</button>
+          <div style="font-size:56px; margin-bottom:14px;">✨</div>
+          <h3 style="font-family:var(--font-serif); font-size:22px; margin-bottom:8px;">解鎖成功！</h3>
+          <p style="font-size:14px; color:var(--ink-soft); margin-bottom:20px;">
+            ${spot.npc.name} 已等候你多時。<br>準備好開始任務了嗎？
+          </p>
+          <a href="../task.html?spot=${spot.id}" class="btn btn-primary btn-block">開始 NPC 任務 →</a>
+          <button class="btn btn-ghost btn-block btn-sm" style="margin-top:8px;" onclick="this.parentElement.parentElement.remove(); renderQR();">稍後再說</button>
+        </div>
+      </div>
+    `;
+  }, 1800);
+}
+window.simulateScan = simulateScan;
+
+// Description
+document.getElementById('long-desc').innerHTML = `<p>${spot.long.replace(/。/g, '。</p><p>').replace(/<p>$/,'').replace(/^<\/p>/,'')}</p>`;
+
+// Features
+document.getElementById('features').innerHTML = spot.features.map(f => `
+  <div class="feature-cell">
+    <div class="feature-t">${f.t}</div>
+    <div class="feature-d">${f.d}</div>
+  </div>
+`).join('');
+
+// Task preview
+function renderTaskPreview() {
+  const s = APP.loadState();
+  const tasks = APP.TASKS[spot.id];
+  const html = tasks.map((t, i) => {
+    const done = !!s.completedTasks[`${spot.id}-${i}`];
+    const typeLabel = ({quiz: '問答', spot: '尋找', photo: '拍照', design: '設計', diy: '手作', order: '排序'})[t.type] || '任務';
+    return `
+      <div class="ticket" style="margin-bottom:10px; ${done ? 'opacity:0.55;': ''}">
+        <div class="ticket-stub">
+          <div class="ticket-stub-num">${i+1}</div>
+          <div class="ticket-stub-label">${typeLabel}</div>
+        </div>
+        <div class="ticket-body">
+          <div class="ticket-title">${t.q.length > 40 ? t.q.slice(0, 40) + '…' : t.q}</div>
+          <div class="ticket-meta">獎勵 +${t.points} 點 ${done ? '· ✓ 已完成' : ''}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  document.getElementById('task-preview').innerHTML = html;
+}
+renderTaskPreview();
+
+// Shops
+const shopsBySpot = {
+  lin: [
+    { name: '林百貨頂樓茶屋', desc: '昭和風日式抹茶與洋菓子，眺望府城天際線。', meta: '☕ 飲品 · 距 0m' },
+    { name: '振發茶行', desc: '台南百年茶行，現場品飲台灣茶與府城限定茶罐。', meta: '🍵 茶葉 · 距 280m' },
+    { name: '阿杰溫體牛肉湯', desc: '台南經典溫體牛肉湯，清晨限定。', meta: '🥣 早食 · 距 600m' },
+  ],
+  confucius: [
+    { name: '莉莉水果店', desc: '70 年老字號，季節限定芒果冰是台南經典。', meta: '🍧 冰品 · 距 200m' },
+    { name: '阿杰溫體牛肉湯', desc: '清晨限定的溫體牛肉湯，孔廟周邊必訪早食。', meta: '🥣 早食 · 距 350m' },
+    { name: '再發號百年肉粽', desc: '創業逾百年，府城八寶肉粽的代表。', meta: '🥟 小吃 · 距 450m' },
+  ],
+  chihkan: [
+    { name: '度小月擔仔麵', desc: '1895 年創立，台南擔仔麵的始祖。', meta: '🍜 麵食 · 距 400m' },
+    { name: '永記虱目魚丸湯', desc: '40 年老店，手工魚丸鮮彈，台南早食代表。', meta: '🐟 早食 · 距 350m' },
+    { name: '阿杰溫體牛肉湯', desc: '清晨限定，溫體牛肉湯標竿。', meta: '🥣 早食 · 距 600m' },
+  ],
+  chuanmei: [
+    { name: '阿輝伯老戲院咖啡', desc: '隔壁巷弄的復古咖啡館，看完戲坐下回味。', meta: '☕ 飲品 · 距 80m' },
+    { name: '永福路碗粿', desc: '在地老店，米漿蒸製的傳統碗粿。', meta: '🍚 小吃 · 距 250m' },
+    { name: '台南金浦冰店', desc: '台南鳳梨冰、四果冰的長青店。', meta: '🍧 冰品 · 距 400m' },
+  ],
+  street: [
+    { name: '同記安平豆花', desc: '60 年老店，安平花生豆花的代表。', meta: '🍮 甜點 · 距 300m' },
+    { name: '神農街糖蔥老攤', desc: '神農街口的傳統糖藝攤位，現場製作。', meta: '🍬 糖藝 · 距 0m' },
+    { name: '安平劍獅工坊', desc: '劍獅文化體驗與小物選購。', meta: '🛍 文創 · 距 500m' },
+  ],
+};
+document.getElementById('shops').innerHTML = (shopsBySpot[spot.id] || []).map(sh => `
+  <div style="background:var(--cream); border-radius:var(--radius-md); padding:16px; margin-bottom:10px; display:flex; gap:14px; align-items:center;">
+    <div style="width:48px; height:48px; border-radius:50%; background:var(--brick); color:white; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0;">🏪</div>
+    <div style="flex:1;">
+      <div style="font-family:var(--font-serif); font-size:15px; font-weight:700; margin-bottom:2px;">${sh.name}</div>
+      <div style="font-size:12px; color:var(--ink-mute); line-height:1.55; margin-bottom:4px;">${sh.desc}</div>
+      <div style="font-size:11px; color:var(--coffee); letter-spacing:0.06em;">${sh.meta}</div>
+    </div>
+  </div>
+`).join('');
+
+// Mini map
+const miniMap = L.map('mini-map', { zoomControl: false, scrollWheelZoom: false, dragging: false })
+  .setView([spot.lat, spot.lng], 16);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(miniMap);
+const icon = L.divIcon({
+  className: '',
+  html: `<div style="width:36px; height:36px; background:${spot.color}; border:3px solid white; border-radius:50% 50% 50% 0; transform:rotate(-45deg); box-shadow:0 2px 8px rgba(0,0,0,0.3);"></div>`,
+  iconSize: [36, 36], iconAnchor: [18, 36],
+});
+L.marker([spot.lat, spot.lng], { icon }).addTo(miniMap);
+
+document.getElementById('address').textContent = spot.address;
+document.getElementById('map-link').href = `https://maps.google.com/?q=${encodeURIComponent(spot.name + ' 台南')}`;
+
+// Task summary
+function renderTaskSummary() {
+  const total = APP.TASKS[spot.id].length;
+  const done = APP.getCompletedCount(spot.id);
+  const pts = APP.TASKS[spot.id].reduce((sum, t) => sum + t.points, 0);
+  document.getElementById('task-summary').innerHTML = `
+    <div class="task-stat">
+      <div class="task-stat-num">${done}/${total}</div>
+      <div class="task-stat-label">已完成</div>
+    </div>
+    <div class="task-stat">
+      <div class="task-stat-num">${pts}</div>
+      <div class="task-stat-label">總點數</div>
+    </div>
+  `;
+}
+renderTaskSummary();
+
+// Basic info
+document.getElementById('sb-info').innerHTML = `
+  <div class="sb-info-row"><span class="label">主題</span><span class="val">${spot.theme}</span></div>
+  <div class="sb-info-row"><span class="label">時代</span><span class="val">${spot.era}</span></div>
+  <div class="sb-info-row"><span class="label">推薦停留</span><span class="val">${spot.duration}</span></div>
+  <div class="sb-info-row"><span class="label">徽章</span><span class="val">🏅 ${spot.badge}</span></div>
+  <div class="sb-info-row"><span class="label">任務數</span><span class="val">${APP.TASKS[spot.id].length} 項</span></div>
+`;
+
+// DIY description per spot
+const diyMap = {
+  lin: '昭和摩登復古拍照、林百貨小物彩繪',
+  confucius: '毛筆書寫體驗、祈願木牌書寫',
+  chihkan: '古地圖製作、府城碑文拓印',
+  chuanmei: '手繪電影看板體驗、復古票券設計',
+  street: '畫糖、椪糖、藍染、捏麵人、竹編、童玩 任選',
+};
+document.getElementById('diy-desc').textContent = diyMap[spot.id];
+
+// Nearby
+const others = APP.SPOTS.filter(x => x.id !== spot.id);
+document.getElementById('nearby').innerHTML = others.map(o => `
+  <a href="${o.id}.html" style="display:flex; align-items:center; gap:12px; padding:10px; border-radius:var(--radius-sm); text-decoration:none; color:inherit; transition:background 0.15s;"
+    onmouseover="this.style.background='var(--cream)'" onmouseout="this.style.background='transparent'">
+    <div style="width:36px; height:36px; border-radius:50%; background:${o.color}; color:white; display:flex; align-items:center; justify-content:center; font-size:14px; font-family:var(--font-serif); font-weight:700; flex-shrink:0;">${APP.SPOTS.indexOf(o)+1}</div>
+    <div style="flex:1; min-width:0;">
+      <div style="font-family:var(--font-serif); font-size:14px; font-weight:600;">${o.name}</div>
+      <div style="font-size:11px; color:var(--ink-mute); letter-spacing:0.04em;">${o.theme}</div>
+    </div>
+  </a>
+`).join('');
+
+// DIY modal
+function openDIY() {
+  document.getElementById('modal-mount').innerHTML = `
+    <div class="modal-back" onclick="if(event.target===this){this.remove()}">
+      <div class="modal-card" style="max-width:480px; text-align:left;">
+        <button class="modal-close" onclick="this.parentElement.parentElement.remove()">✕</button>
+        <div style="text-align:center; margin-bottom:20px;">
+          <div style="font-size:42px;">🎨</div>
+          <h3 style="font-family:var(--font-serif); font-size:22px; margin-top:6px;">DIY 手作體驗預約</h3>
+          <div style="font-size:13px; color:var(--ink-mute);">${spot.name}</div>
+        </div>
+        <form onsubmit="submitDIY(event)">
+          <label style="display:block; font-size:12px; color:var(--coffee); letter-spacing:0.06em; margin-bottom:6px;">體驗類型</label>
+          <select required name="type" style="width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:inherit; font-size:14px; margin-bottom:14px; background:white;">
+            ${diyMap[spot.id].split('、').map(x => `<option>${x.replace(' 任選','')}</option>`).join('')}
+          </select>
+          <label style="display:block; font-size:12px; color:var(--coffee); letter-spacing:0.06em; margin-bottom:6px;">預約日期</label>
+          <input required type="date" name="date" min="${new Date().toISOString().slice(0,10)}" style="width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:inherit; font-size:14px; margin-bottom:14px;">
+          <label style="display:block; font-size:12px; color:var(--coffee); letter-spacing:0.06em; margin-bottom:6px;">姓名</label>
+          <input required name="name" placeholder="您的姓名" style="width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:inherit; font-size:14px; margin-bottom:18px;">
+          <button type="submit" class="btn btn-primary btn-block">確認預約 →</button>
+          <div style="font-size:11px; color:var(--ink-mute); margin-top:10px; text-align:center;">＊本系統為 MVP 預約模擬，實際合作店家上線後將由場域確認</div>
+        </form>
+      </div>
+    </div>
+  `;
+}
+function submitDIY(e) {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  APP.bookDIY(spot.id, f.get('type'), f.get('date'), f.get('name'));
+  document.getElementById('modal-mount').innerHTML = `
+    <div class="modal-back" onclick="if(event.target===this){this.remove()}">
+      <div class="modal-card">
+        <div style="font-size:48px; margin-bottom:14px;">✅</div>
+        <h3 style="font-family:var(--font-serif); font-size:20px; margin-bottom:8px;">預約已送出</h3>
+        <p style="font-size:13px; color:var(--ink-soft); line-height:1.7;">
+          ${f.get('name')} 你好，<br>
+          已為您預約 <strong>${f.get('date')}</strong> 的「<strong>${f.get('type')}</strong>」體驗。<br>
+          抵達現場後出示此確認即可。
+        </p>
+        <button class="btn btn-primary" style="margin-top:18px;" onclick="this.closest('.modal-back').remove()">好的</button>
+      </div>
+    </div>
+  `;
+}
+window.openDIY = openDIY;
+window.submitDIY = submitDIY;
+window.renderQR = renderQR;
+
+document.addEventListener('state-changed', () => {
+  document.getElementById('nav-mount').innerHTML = APP.renderNav('explore', '../');
+  renderQR();
+  renderTaskPreview();
+  renderTaskSummary();
+});
+</script>
+
+</body>
+</html>

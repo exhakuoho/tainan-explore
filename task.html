@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NPC 任務 — 藝饗台南 2.0</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.task-stage {
+  min-height: calc(100vh - 72px);
+  background: linear-gradient(180deg, var(--coffee-dark), oklch(15% 0.025 45));
+  color: var(--cream);
+  padding: 40px 0 80px;
+}
+
+.task-frame {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* NPC Stage */
+.npc-stage {
+  background: linear-gradient(135deg, var(--coffee), var(--coffee-dark));
+  border: 1px solid oklch(50% 0.04 60);
+  border-radius: var(--radius-lg);
+  padding: 28px 32px;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.npc-stage::before {
+  content: ''; position: absolute;
+  top: -80px; right: -80px;
+  width: 240px; height: 240px;
+  background: radial-gradient(circle, oklch(70% 0.12 78 / 0.18), transparent 70%);
+}
+.task-eyebrow {
+  font-size: 11px; letter-spacing: 0.22em;
+  color: var(--gold); margin-bottom: 12px;
+  display: flex; align-items: center; gap: 10px;
+}
+.task-eyebrow::before { content: ''; width: 30px; height: 1px; background: var(--gold); }
+.task-spot-name {
+  font-family: var(--font-serif);
+  font-size: 28px; font-weight: 900;
+  color: var(--cream);
+  letter-spacing: 0.04em;
+}
+.task-spot-theme { font-size: 13px; color: var(--gold-light); margin-top: 4px; }
+
+.npc-row {
+  display: flex; gap: 18px; align-items: center;
+  margin-top: 22px;
+}
+.npc-av {
+  width: 72px; height: 72px;
+  background: var(--gold);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  border: 3px solid var(--gold-light);
+  flex-shrink: 0;
+}
+.npc-name { font-family: var(--font-serif); font-size: 18px; font-weight: 700; color: var(--cream); }
+.npc-role { font-size: 12px; color: var(--gold-light); margin-top: 2px; }
+.npc-quote {
+  margin-top: 18px;
+  background: oklch(100% 0 0 / 0.08);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 14px 18px;
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: oklch(92% 0.03 75);
+  font-size: 14px;
+  line-height: 1.85;
+}
+
+/* Progress bar */
+.task-progress-wrap {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 22px;
+  font-size: 13px;
+  color: var(--gold-light);
+}
+.task-progress-track {
+  flex: 1;
+  height: 6px;
+  background: oklch(100% 0 0 / 0.1);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.task-progress-fill {
+  height: 100%;
+  background: linear-gradient(to right, var(--gold-deep), var(--gold));
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+/* Task card */
+.task-card {
+  background: var(--cream);
+  color: var(--ink);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  box-shadow: 0 20px 40px oklch(0% 0 0 / 0.25);
+}
+.task-num {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--brick); color: var(--cream);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 0.06em;
+  margin-bottom: 16px;
+}
+.task-type {
+  display: inline-block;
+  background: oklch(96% 0.04 80);
+  color: var(--coffee-dark);
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  margin-left: 8px;
+  letter-spacing: 0.06em;
+  border: 1px solid var(--gold-deep);
+}
+.task-q {
+  font-family: var(--font-serif);
+  font-size: 22px; font-weight: 700;
+  color: var(--ink);
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+.task-hint {
+  font-size: 12px; color: var(--ink-mute);
+  background: var(--cream-mid);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin-bottom: 22px;
+  display: flex; gap: 8px; align-items: center;
+}
+
+/* Options */
+.task-options {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.task-option {
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  cursor: pointer;
+  font-size: 15px;
+  display: flex; align-items: center; gap: 12px;
+  transition: all 0.18s;
+  text-align: left;
+  font-family: inherit;
+}
+.task-option:hover {
+  border-color: var(--brick);
+  background: oklch(97% 0.015 30);
+  transform: translateX(4px);
+}
+.task-option.correct {
+  border-color: var(--green);
+  background: oklch(94% 0.05 145);
+  color: var(--green-deep);
+}
+.task-option.wrong {
+  border-color: var(--brick);
+  background: oklch(95% 0.05 30);
+  color: var(--brick-deep);
+}
+.task-option-letter {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--cream-mid);
+  color: var(--coffee);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-serif);
+  font-size: 13px; font-weight: 700;
+  flex-shrink: 0;
+}
+.task-option.correct .task-option-letter { background: var(--green); color: var(--cream); }
+.task-option.wrong .task-option-letter { background: var(--brick); color: var(--cream); }
+
+/* Order task */
+.order-stack { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+.order-item {
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  display: flex; align-items: center; gap: 12px;
+  cursor: move;
+  font-size: 15px;
+}
+.order-item-num {
+  font-family: var(--font-serif);
+  font-size: 22px; font-weight: 700;
+  color: var(--brick);
+  width: 30px;
+}
+.order-item-text { flex: 1; }
+.order-item-handle { color: var(--ink-mute); font-size: 18px; }
+.order-controls { display: flex; gap: 4px; }
+.order-btn {
+  background: var(--cream-mid); border: none;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  cursor: pointer; font-size: 12px;
+  color: var(--coffee);
+  display: flex; align-items: center; justify-content: center;
+}
+.order-btn:hover { background: var(--brick); color: var(--cream); }
+
+/* photo/spot tasks */
+.upload-area {
+  background: white;
+  border: 2px dashed var(--gold-deep);
+  border-radius: var(--radius-md);
+  padding: 36px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 18px;
+}
+.upload-area:hover { background: oklch(96% 0.04 80); }
+.upload-icon { font-size: 44px; margin-bottom: 10px; }
+.upload-text { font-size: 14px; color: var(--coffee); font-family: var(--font-serif); }
+.upload-sub { font-size: 12px; color: var(--ink-mute); margin-top: 4px; }
+
+/* Footer actions */
+.task-foot {
+  display: flex; align-items: center; gap: 12px;
+  margin-top: 24px; padding-top: 22px;
+  border-top: 1px dashed var(--border);
+}
+.task-points { font-family: var(--font-serif); font-size: 18px; color: var(--brick); font-weight: 700; }
+.task-points-label { font-size: 11px; color: var(--coffee); letter-spacing: 0.1em; }
+
+/* COMPLETED state */
+.task-done {
+  background: linear-gradient(135deg, oklch(95% 0.04 80), oklch(92% 0.05 75));
+  text-align: center;
+  border: 1px solid var(--gold);
+}
+.task-done-icon { font-size: 56px; margin-bottom: 8px; }
+.task-done-title { font-family: var(--font-serif); font-size: 24px; font-weight: 700; color: var(--brick); margin-bottom: 8px; }
+.task-done-text { color: var(--coffee); font-size: 14px; line-height: 1.7; max-width: 480px; margin: 0 auto 20px; }
+.task-done-badge {
+  background: var(--coffee-dark); color: var(--gold);
+  border: 2px solid var(--gold);
+  padding: 16px 32px;
+  border-radius: var(--radius-md);
+  display: inline-flex; align-items: center; gap: 12px;
+  margin-bottom: 24px;
+}
+.task-done-badge-icon { font-size: 32px; }
+.task-done-badge-text { font-family: var(--font-serif); font-size: 18px; font-weight: 700; }
+
+/* feedback */
+.feedback {
+  margin-top: 18px;
+  padding: 14px 18px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  display: none;
+}
+.feedback.show { display: block; animation: fadeUp 0.4s ease; }
+.feedback.correct { background: oklch(94% 0.05 145); color: var(--green-deep); border: 1px solid var(--green); }
+.feedback.wrong { background: oklch(95% 0.04 30); color: var(--brick-deep); border: 1px solid var(--brick); }
+</style>
+</head>
+<body>
+
+<div id="nav-mount"></div>
+
+<div class="task-stage">
+  <div class="task-frame">
+
+    <a href="explore.html" class="back-btn" style="color:var(--gold-light); margin-bottom:18px;">回到場域列表</a>
+
+    <!-- NPC stage -->
+    <div class="npc-stage">
+      <div class="task-eyebrow">CURRENT MISSION · 進行中任務</div>
+      <div class="task-spot-name" id="spot-name"></div>
+      <div class="task-spot-theme" id="spot-theme"></div>
+      <div class="npc-row">
+        <div class="npc-av" id="npc-av"></div>
+        <div>
+          <div class="npc-name" id="npc-name"></div>
+          <div class="npc-role" id="npc-role"></div>
+        </div>
+      </div>
+      <div class="npc-quote" id="npc-quote"></div>
+    </div>
+
+    <!-- Progress -->
+    <div class="task-progress-wrap">
+      <span id="progress-text">任務進度</span>
+      <div class="task-progress-track"><div class="task-progress-fill" id="progress-fill"></div></div>
+      <span id="progress-pct"></span>
+    </div>
+
+    <!-- Task card mount -->
+    <div id="task-mount"></div>
+  </div>
+</div>
+
+<div id="modal-mount"></div>
+<div id="footer-mount"></div>
+
+<script src="app.js"></script>
+<script>
+const SPOT_ID = new URLSearchParams(location.search).get('spot') || 'lin';
+const spot = APP.getSpot(SPOT_ID);
+if (!spot) {
+  location.href = 'explore.html';
+}
+const tasks = APP.TASKS[SPOT_ID];
+
+document.title = `${spot.name} · NPC 任務 — 藝饗台南 2.0`;
+document.getElementById('nav-mount').innerHTML = APP.renderNav('explore');
+document.getElementById('footer-mount').innerHTML = APP.renderFooter();
+
+// header
+document.getElementById('spot-name').textContent = spot.name;
+document.getElementById('spot-theme').textContent = `${spot.theme} · ${spot.era}`;
+document.getElementById('npc-av').textContent = spot.npc.avatar;
+document.getElementById('npc-name').textContent = spot.npc.name;
+document.getElementById('npc-role').textContent = spot.npc.role;
+document.getElementById('npc-quote').textContent = `「${spot.npc.intro}」`;
+
+function nextTaskIndex() {
+  const s = APP.loadState();
+  for (let i = 0; i < tasks.length; i++) {
+    if (!s.completedTasks[`${SPOT_ID}-${i}`]) return i;
+  }
+  return -1;
+}
+
+function updateProgress() {
+  const done = APP.getCompletedCount(SPOT_ID);
+  const total = tasks.length;
+  const pct = total ? (done / total * 100) : 0;
+  document.getElementById('progress-text').innerHTML = `任務進度 <strong>${done}/${total}</strong>`;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent = Math.round(pct) + '%';
+}
+
+function typeLabel(t) {
+  return ({quiz:'⚜️ 問答', spot:'🔍 尋找', photo:'📸 拍照', design:'🎨 設計', diy:'✋ 手作', order:'🔢 排序'})[t] || '任務';
+}
+
+let orderState = []; // current order during sorting
+
+function renderCurrent() {
+  updateProgress();
+  const idx = nextTaskIndex();
+
+  if (idx === -1) {
+    renderAllDone();
+    return;
+  }
+
+  const t = tasks[idx];
+  let inner = '';
+
+  if (t.type === 'quiz') {
+    inner = `
+      <div class="task-options" id="opts">
+        ${t.options.map((o, oi) => `
+          <button class="task-option" onclick="answerQuiz(${idx}, ${oi})" data-oi="${oi}">
+            <div class="task-option-letter">${String.fromCharCode(65+oi)}</div>
+            <div>${o}</div>
+          </button>
+        `).join('')}
+      </div>
+    `;
+  } else if (t.type === 'order') {
+    orderState = t.items.map((_, i) => i); // start as original order [0,1,2,3]
+    inner = `
+      <div class="order-stack" id="order-stack"></div>
+      <button class="btn btn-primary btn-block" onclick="submitOrder(${idx})">提交答案 →</button>
+    `;
+  } else if (t.type === 'spot' || t.type === 'photo' || t.type === 'design' || t.type === 'diy') {
+    const verb = ({spot:'尋找並拍照', photo:'拍照打卡', design:'設計作品', diy:'完成手作'})[t.type];
+    inner = `
+      <div class="upload-area" onclick="document.getElementById('fake-upload').click()">
+        <input type="file" id="fake-upload" style="display:none;" accept="image/*" onchange="completePhotoTask(${idx})">
+        <div class="upload-icon">${({spot:'📍', photo:'📸', design:'🎨', diy:'✋'})[t.type]}</div>
+        <div class="upload-text">點擊上傳照片完成「${verb}」</div>
+        <div class="upload-sub">支援 JPG / PNG · 或點擊下方按鈕模擬完成</div>
+      </div>
+      <button class="btn btn-coffee btn-block" onclick="completePhotoTask(${idx})">已${verb}完成 ✓</button>
+    `;
+  }
+
+  document.getElementById('task-mount').innerHTML = `
+    <div class="task-card fade-up" id="task-card">
+      <div>
+        <span class="task-num">第 ${idx+1} / ${tasks.length} 題</span>
+        <span class="task-type">${typeLabel(t.type)}</span>
+      </div>
+      <div class="task-q">${t.q}</div>
+      ${t.hint ? `<div class="task-hint">💡 <span>${t.hint}</span></div>` : ''}
+      ${inner}
+      <div class="feedback" id="feedback"></div>
+      <div class="task-foot">
+        <span class="task-points-label">獎勵</span>
+        <span class="task-points">+${t.points} 點</span>
+        <span style="flex:1;"></span>
+        <button class="btn btn-ghost btn-sm" onclick="skip()">略過</button>
+      </div>
+    </div>
+  `;
+
+  if (t.type === 'order') renderOrderStack(idx);
+}
+
+function renderOrderStack(idx) {
+  const t = tasks[idx];
+  const html = orderState.map((srcIdx, pos) => `
+    <div class="order-item">
+      <div class="order-item-num">${pos+1}</div>
+      <div class="order-item-text">${t.items[srcIdx]}</div>
+      <div class="order-controls">
+        <button class="order-btn" ${pos===0?'disabled':''} onclick="moveOrder(${pos},-1)" title="上移">▲</button>
+        <button class="order-btn" ${pos===orderState.length-1?'disabled':''} onclick="moveOrder(${pos},1)" title="下移">▼</button>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('order-stack').innerHTML = html;
+}
+
+function moveOrder(pos, dir) {
+  const np = pos + dir;
+  if (np < 0 || np >= orderState.length) return;
+  [orderState[pos], orderState[np]] = [orderState[np], orderState[pos]];
+  renderOrderStack(nextTaskIndex());
+}
+
+function submitOrder(idx) {
+  const t = tasks[idx];
+  const correct = JSON.stringify(orderState) === JSON.stringify(t.answer);
+  const fb = document.getElementById('feedback');
+  if (correct) {
+    fb.className = 'feedback show correct';
+    fb.innerHTML = '✓ 正確！依時間順序完美排列。';
+    setTimeout(() => completeTask(idx), 900);
+  } else {
+    fb.className = 'feedback show wrong';
+    fb.innerHTML = '✗ 順序有誤，再想想看。提示：先從荷蘭時期開始。';
+  }
+}
+
+function answerQuiz(idx, oi) {
+  const t = tasks[idx];
+  const correct = oi === t.answer;
+  document.querySelectorAll('#opts .task-option').forEach(b => b.disabled = true);
+  document.querySelectorAll(`#opts .task-option[data-oi="${oi}"]`).forEach(b => {
+    b.classList.add(correct ? 'correct' : 'wrong');
+  });
+  if (!correct) {
+    document.querySelectorAll(`#opts .task-option[data-oi="${t.answer}"]`).forEach(b => b.classList.add('correct'));
+  }
+  const fb = document.getElementById('feedback');
+  fb.className = `feedback show ${correct ? 'correct' : 'wrong'}`;
+  fb.innerHTML = correct
+    ? '✓ 答對了！恭喜獲得點數。'
+    : `✗ 答案是「${t.options[t.answer]}」，下次加油！`;
+  setTimeout(() => {
+    if (correct) completeTask(idx);
+    else {
+      // Still allow them to continue (no point), or you could re-enable. We'll let user move forward.
+      // Skip without points for now
+      setTimeout(() => skipNoPoints(), 1200);
+    }
+  }, correct ? 1000 : 2000);
+}
+
+function completePhotoTask(idx) {
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback show correct';
+  fb.innerHTML = '✓ 已完成任務！系統已記錄你的作品。';
+  setTimeout(() => completeTask(idx), 800);
+}
+
+function completeTask(idx) {
+  const result = APP.completeTask(SPOT_ID, idx);
+  if (result.badgeEarned) {
+    renderBadgeEarned();
+    return;
+  }
+  showPointsToast(result.points);
+  setTimeout(() => renderCurrent(), 600);
+}
+
+function skip() {
+  // mark as visited but no point — actually we can't track partial. For UX just go to next via flag.
+  // Simplest: mark task as done with 0-point exception. We'll just leave it incomplete and reload.
+  const idx = nextTaskIndex();
+  if (idx < tasks.length - 1) {
+    // Temporarily push it to back by toggling done & undo. Simpler: mark complete with 0 points override.
+    const s = APP.loadState();
+    s.completedTasks[`${SPOT_ID}-${idx}__skipped`] = true;
+    APP.saveState(s);
+  }
+  // Fallback: increment a session-only counter
+  sessionStorage.setItem(`skip-${SPOT_ID}-${idx}`, '1');
+  renderCurrent();
+}
+function skipNoPoints() { skip(); }
+
+// Override nextTaskIndex to respect session skips
+function nextTaskIndexWithSkip() {
+  const s = APP.loadState();
+  for (let i = 0; i < tasks.length; i++) {
+    if (!s.completedTasks[`${SPOT_ID}-${i}`] && !sessionStorage.getItem(`skip-${SPOT_ID}-${i}`)) return i;
+  }
+  return -1;
+}
+nextTaskIndex = nextTaskIndexWithSkip;
+
+function showPointsToast(pts) {
+  const t = document.createElement('div');
+  t.style.cssText = 'position:fixed; top:90px; right:40px; z-index:2000; background:var(--gold); color:var(--coffee-dark); padding:14px 22px; border-radius:30px; font-family:serif; font-weight:700; box-shadow:0 6px 24px rgba(0,0,0,0.25); animation:fadeUp 0.3s ease;';
+  t.innerHTML = `🪙 +${pts} 點！`;
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity='0'; t.style.transition='opacity 0.4s'; }, 1400);
+  setTimeout(() => t.remove(), 1900);
+}
+
+function renderBadgeEarned() {
+  document.getElementById('modal-mount').innerHTML = `
+    <div class="modal-back" style="position:fixed; inset:0; z-index:1000; background:oklch(15% 0.01 50 / 0.8); display:flex; align-items:center; justify-content:center; padding:20px;">
+      <div style="background:white; border-radius:var(--radius-lg); max-width:480px; width:100%; padding:36px; text-align:center; animation:scaleIn 0.4s ease;">
+        <div style="font-size:14px; letter-spacing:0.2em; color:var(--brick); margin-bottom:10px;">★ ACHIEVEMENT UNLOCKED ★</div>
+        <div style="font-size:80px; margin:14px 0;">🏅</div>
+        <div style="font-family:var(--font-serif); font-size:26px; font-weight:900; color:var(--brick); margin-bottom:6px;">${spot.badge}</div>
+        <div style="color:var(--ink-soft); font-size:14px; line-height:1.7; margin-bottom:24px;">
+          恭喜完成「${spot.name}」全部任務！<br>
+          ${spot.npc.name} 給了你這枚徽章。
+        </div>
+        <a href="points.html" class="btn btn-primary btn-block">查看我的集點 →</a>
+        <a href="explore.html" class="btn btn-ghost btn-block btn-sm" style="margin-top:8px;">繼續探索其他場域</a>
+      </div>
+    </div>
+  `;
+}
+
+function renderAllDone() {
+  document.getElementById('task-mount').innerHTML = `
+    <div class="task-card task-done">
+      <div class="task-done-icon">🎉</div>
+      <div class="task-done-title">${spot.name} 任務完成！</div>
+      <div class="task-done-badge">
+        <span class="task-done-badge-icon">🏅</span>
+        <span class="task-done-badge-text">${spot.badge}　已收入</span>
+      </div>
+      <div class="task-done-text">
+        恭喜你！你已經完成了「${spot.name}」的全部 NPC 任務，獲得了 <strong>${spot.badge}</strong>。<br>
+        繼續探索其他場域，集滿五枚徽章成為府城文化通！
+      </div>
+      <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+        <a href="explore.html" class="btn btn-primary">繼續其他場域 →</a>
+        <a href="points.html" class="btn btn-outline">查看集點</a>
+        <a href="rewards.html" class="btn btn-gold">兌換獎勵</a>
+      </div>
+    </div>
+  `;
+}
+
+// Expose
+window.answerQuiz = answerQuiz;
+window.moveOrder = moveOrder;
+window.submitOrder = submitOrder;
+window.completePhotoTask = completePhotoTask;
+window.skip = skip;
+
+renderCurrent();
+
+document.addEventListener('state-changed', () => {
+  document.getElementById('nav-mount').innerHTML = APP.renderNav('explore');
+});
+</script>
+
+</body>
+</html>

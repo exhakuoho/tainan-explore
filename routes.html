@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>選擇路線 — 藝饗台南 2.0</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.page-hero {
+  background: var(--coffee-dark);
+  color: var(--cream);
+  padding: 64px 0 56px;
+  position: relative;
+  overflow: hidden;
+}
+.page-hero::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(to right, transparent, var(--gold), transparent);
+}
+.page-hero h1 { font-family: var(--font-serif); font-size: clamp(28px,4vw,44px); margin-bottom: 10px; letter-spacing: 0.04em; }
+.page-hero .lead { font-size: 15px; color: oklch(82% 0.04 75); max-width: 640px; line-height: 1.8; }
+.page-hero .eyebrow { font-size: 11px; letter-spacing: 0.22em; color: var(--gold); margin-bottom: 14px; }
+
+.route-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-soft);
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.25s;
+}
+.route-card:hover { box-shadow: var(--shadow-md); }
+.route-card.selected { border-color: var(--brick); border-width: 2px; box-shadow: 0 0 0 4px oklch(48% 0.13 32 / 0.12); }
+@media (max-width: 800px) { .route-card { grid-template-columns: 1fr; } }
+
+.route-card-cover {
+  background: var(--coffee);
+  color: var(--cream);
+  padding: 32px 28px;
+  display: flex; flex-direction: column;
+  position: relative; overflow: hidden;
+}
+.route-card-cover::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at 80% 20%, oklch(100% 0 0 / 0.08), transparent 50%);
+}
+.route-card-cover-inner { position: relative; z-index: 1; }
+.route-card-icon { font-size: 52px; margin-bottom: 14px; line-height: 1; }
+.route-card-name {
+  font-family: var(--font-serif);
+  font-size: 24px; font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+.route-card-duration {
+  font-size: 12px; letter-spacing: 0.12em;
+  color: var(--gold-light);
+  margin-bottom: 22px;
+}
+.route-card-bonus {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--gold);
+  color: var(--coffee-dark);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px; font-weight: 700;
+  align-self: flex-start;
+}
+.route-card-info { padding: 28px 32px; display: flex; flex-direction: column; }
+
+.route-card-meta {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.route-card-spots {
+  font-family: var(--font-serif);
+  font-size: 16px; font-weight: 600;
+  color: var(--coffee);
+  margin-bottom: 16px;
+  line-height: 1.7;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+}
+.route-spot-chip {
+  background: var(--cream);
+  border: 1px solid var(--cream-dark);
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--ink);
+  font-family: var(--font-sans); font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.route-arrow { color: var(--gold-deep); font-size: 16px; }
+
+.route-card-detail {
+  background: var(--cream);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  font-size: 13px;
+  display: grid; grid-template-columns: auto 1fr; gap: 8px 14px;
+  align-items: start;
+}
+.route-card-detail-label {
+  font-size: 11px; letter-spacing: 0.1em;
+  color: var(--coffee); font-weight: 600;
+  white-space: nowrap;
+}
+.route-card-detail-val { color: var(--ink-soft); line-height: 1.6; }
+
+.route-card-actions { display: flex; gap: 10px; margin-top: auto; }
+
+/* selected status banner */
+.current-route {
+  background: oklch(96% 0.04 80);
+  border: 1px solid var(--gold-deep);
+  border-radius: var(--radius-md);
+  padding: 18px 22px;
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 28px;
+}
+.current-route-icon { font-size: 28px; }
+.current-route-text { flex: 1; font-size: 14px; color: var(--coffee-dark); }
+.current-route-text strong { color: var(--brick); }
+</style>
+</head>
+<body>
+
+<div id="nav-mount"></div>
+
+<section class="page-hero">
+  <div class="container">
+    <div class="eyebrow">CHOOSE YOUR ROUTE · 路線選擇</div>
+    <h1>選擇一條路線　走進府城</h1>
+    <p class="lead">每條路線都串連不同的場域與文化主題，依照你的時間與興趣，找到最適合的探索方式。完成路線會獲得額外加碼點數。</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div id="current-route"></div>
+    <div id="routes-list"></div>
+  </div>
+</section>
+
+<div id="footer-mount"></div>
+
+<script src="app.js"></script>
+<script>
+document.getElementById('nav-mount').innerHTML = APP.renderNav('routes');
+document.getElementById('footer-mount').innerHTML = APP.renderFooter();
+
+function render() {
+  const state = APP.loadState();
+
+  // Current selected route banner
+  if (state.selectedRoute) {
+    const r = APP.getRoute(state.selectedRoute);
+    document.getElementById('current-route').innerHTML = `
+      <div class="current-route">
+        <div class="current-route-icon">${r.icon}</div>
+        <div class="current-route-text">
+          目前選擇的路線是　<strong>「${r.name}」</strong>　·　${r.duration}　·　共 ${r.spots.length} 個場域
+        </div>
+        <a href="explore.html" class="btn btn-coffee btn-sm">查看場域 →</a>
+      </div>
+    `;
+  } else {
+    document.getElementById('current-route').innerHTML = `
+      <div class="current-route" style="background:var(--cream-mid);border-color:var(--border);">
+        <div class="current-route-icon">🧭</div>
+        <div class="current-route-text">尚未選擇路線，請從下方挑選一條開始你的府城探索旅程。</div>
+      </div>
+    `;
+  }
+
+  const html = APP.ROUTES.map(r => {
+    const spotsHTML = r.spots.map((id, i) => {
+      const s = APP.getSpot(id);
+      return `${i > 0 ? '<span class="route-arrow">→</span>' : ''}<span class="route-spot-chip">${s.name}</span>`;
+    }).join('');
+
+    const isSelected = state.selectedRoute === r.id;
+
+    return `
+    <div class="route-card ${isSelected ? 'selected' : ''}" id="${r.id}">
+      <div class="route-card-cover" style="background:${r.color};">
+        <div class="route-card-cover-inner">
+          <div class="route-card-icon">${r.icon}</div>
+          <div class="route-card-name">${r.name}</div>
+          <div class="route-card-duration">⏱ ${r.duration}</div>
+          <div class="route-card-bonus">🪙 路線完成 +${r.bonus} 點</div>
+        </div>
+      </div>
+      <div class="route-card-info">
+        <div class="route-card-meta">
+          <span class="chip chip-brick">${r.spots.length} 個場域</span>
+          <span class="chip chip-coffee">${r.audience.split('、')[0]}</span>
+          <span class="chip chip-gold">完成可獲徽章</span>
+        </div>
+        <div class="route-card-spots">${spotsHTML}</div>
+        <div class="route-card-detail">
+          <div class="route-card-detail-label">適合對象</div>
+          <div class="route-card-detail-val">${r.audience}</div>
+          <div class="route-card-detail-label">體驗重點</div>
+          <div class="route-card-detail-val">${r.focus}</div>
+        </div>
+        <div class="route-card-actions">
+          ${isSelected
+            ? `<button class="btn btn-ghost" disabled>✓ 已選擇此路線</button>
+               <a href="explore.html" class="btn btn-primary">查看場域 →</a>`
+            : `<button class="btn btn-primary" onclick="choose('${r.id}')">選擇此路線 ›</button>
+               <a href="explore.html" class="btn btn-outline">先看場域</a>`}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('routes-list').innerHTML = html;
+}
+
+function choose(id) {
+  APP.selectRoute(id);
+  render();
+  // Smooth scroll to the chosen card
+  setTimeout(() => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({behavior: 'smooth', block: 'center'});
+  }, 100);
+}
+
+render();
+window.choose = choose;
+
+// Re-render nav when state changes (for points)
+document.addEventListener('state-changed', () => {
+  document.getElementById('nav-mount').innerHTML = APP.renderNav('routes');
+});
+</script>
+
+</body>
+</html>

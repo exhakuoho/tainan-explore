@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>後台儀表板 — 藝饗台南 2.0</title>
+<link rel="stylesheet" href="style.css">
+<style>
+body { background: oklch(95% 0.014 75); }
+
+.dash-hero {
+  background: var(--coffee-dark);
+  color: var(--cream);
+  padding: 40px 0;
+}
+.dash-hero h1 { font-family: var(--font-serif); font-size: 32px; margin-bottom: 6px; letter-spacing: 0.04em; }
+.dash-hero .sub { color: oklch(75% 0.03 75); font-size: 13px; }
+.dash-hero .eyebrow { font-size: 11px; letter-spacing: 0.22em; color: var(--gold); margin-bottom: 10px; }
+
+.dash-bar {
+  display: flex; align-items: center; gap: 16px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+.dash-bar select, .dash-bar button {
+  background: oklch(100% 0 0 / 0.08);
+  color: var(--cream);
+  border: 1px solid oklch(100% 0 0 / 0.2);
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-family: inherit;
+  letter-spacing: 0.06em;
+}
+.dash-bar button { cursor: pointer; }
+
+.dash-frame { padding: 32px 0 56px; }
+
+/* KPI row */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+@media (max-width: 900px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+.kpi-card {
+  background: white;
+  border-radius: var(--radius-md);
+  padding: 22px;
+  border: 1px solid var(--border-soft);
+  border-left: 4px solid var(--brick);
+  position: relative;
+}
+.kpi-card.green { border-left-color: var(--green); }
+.kpi-card.gold { border-left-color: var(--gold-deep); }
+.kpi-card.coffee { border-left-color: var(--coffee); }
+.kpi-label {
+  font-size: 11px; color: var(--ink-mute);
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+.kpi-val {
+  font-family: var(--font-serif);
+  font-size: 32px; font-weight: 700;
+  color: var(--ink);
+  line-height: 1;
+  display: flex; align-items: baseline; gap: 4px;
+}
+.kpi-val small { font-size: 14px; color: var(--coffee); font-weight: 500; }
+.kpi-trend {
+  font-size: 12px; margin-top: 8px;
+  display: flex; align-items: center; gap: 4px;
+}
+.kpi-trend.up { color: var(--green-deep); }
+.kpi-trend.down { color: var(--brick); }
+
+/* Two-col layout */
+.dash-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+@media (max-width: 900px) { .dash-grid { grid-template-columns: 1fr; } }
+
+.panel {
+  background: white;
+  border-radius: var(--radius-md);
+  padding: 24px;
+  border: 1px solid var(--border-soft);
+}
+.panel-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 18px;
+}
+.panel-title {
+  font-family: var(--font-serif);
+  font-size: 16px; font-weight: 700;
+  color: var(--ink);
+  letter-spacing: 0.04em;
+}
+.panel-tabs { display: flex; gap: 6px; font-size: 11px; }
+.panel-tab {
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: var(--cream-mid);
+  color: var(--ink-mute);
+  cursor: pointer;
+}
+.panel-tab.active { background: var(--coffee); color: var(--cream); }
+
+/* Bar chart */
+.bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 220px; padding-bottom: 28px; position: relative; }
+.bar-chart::before {
+  content: ''; position: absolute; bottom: 28px; left: 0; right: 0; height: 1px;
+  background: var(--border);
+}
+.bar-col {
+  flex: 1;
+  display: flex; flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  height: 100%;
+  padding-bottom: 28px;
+}
+.bar-fill {
+  width: 100%;
+  background: linear-gradient(to top, var(--brick-deep), var(--brick-light));
+  border-radius: 4px 4px 0 0;
+  margin-top: auto;
+  position: relative;
+  transition: height 0.6s ease;
+}
+.bar-val {
+  position: absolute; top: -22px;
+  font-size: 11px; color: var(--coffee);
+  font-family: var(--font-serif); font-weight: 600;
+  width: 100%; text-align: center;
+}
+.bar-label {
+  position: absolute; bottom: 6px;
+  font-size: 11px;
+  color: var(--ink-mute);
+  white-space: nowrap;
+}
+
+/* Donut */
+.donut-wrap { display: flex; gap: 20px; align-items: center; }
+.donut-svg { flex-shrink: 0; }
+.donut-legend { flex: 1; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.donut-li {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px;
+  padding: 6px 10px;
+  background: var(--cream);
+  border-radius: var(--radius-sm);
+}
+.donut-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.donut-li-label { flex: 1; color: var(--ink); }
+.donut-li-val { font-family: var(--font-serif); font-weight: 700; color: var(--brick); }
+.donut-li-pct { font-size: 10px; color: var(--ink-mute); }
+
+/* Spot list */
+.spot-rank {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.rank-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px;
+  background: var(--cream);
+  border-radius: var(--radius-sm);
+}
+.rank-num {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--coffee); color: var(--cream);
+  font-family: var(--font-serif); font-weight: 700;
+  font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.rank-num.gold { background: var(--gold); color: var(--coffee-dark); }
+.rank-name { font-family: var(--font-serif); font-weight: 600; font-size: 14px; flex: 1; }
+.rank-bar-wrap { flex: 2; height: 6px; background: white; border-radius: 3px; overflow: hidden; min-width: 60px; }
+.rank-bar { height: 100%; background: linear-gradient(to right, var(--gold-deep), var(--gold)); border-radius: 3px; }
+.rank-val { font-family: var(--font-serif); font-weight: 700; color: var(--brick); font-size: 14px; min-width: 50px; text-align: right; }
+
+/* Peak hours line */
+.line-chart {
+  height: 180px;
+  position: relative;
+  padding-bottom: 28px;
+}
+.line-svg { width: 100%; height: 100%; }
+
+/* Feedback row */
+.feedback-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
+}
+@media (max-width: 700px) { .feedback-grid { grid-template-columns: 1fr; } }
+.feedback-card {
+  background: var(--cream);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  border-left: 3px solid var(--gold);
+}
+.fb-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.fb-name { font-family: var(--font-serif); font-weight: 600; font-size: 13px; }
+.fb-loc { font-size: 11px; color: var(--ink-mute); margin-left: 6px; }
+.fb-stars { color: var(--gold-deep); font-size: 12px; }
+.fb-text { font-size: 12px; color: var(--ink-soft); line-height: 1.55; }
+
+/* Mini stat strip */
+.mini-stat-strip {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+  padding: 16px;
+  background: var(--coffee-dark); color: var(--cream);
+  border-radius: var(--radius-md);
+  margin-bottom: 20px;
+}
+.mini-stat { text-align: center; }
+.mini-stat-num { font-family: var(--font-serif); font-size: 22px; color: var(--gold); font-weight: 700; }
+.mini-stat-label { font-size: 11px; opacity: 0.8; letter-spacing: 0.06em; margin-top: 4px; }
+
+/* Category section header */
+.category-head {
+  font-size: 11px; letter-spacing: 0.22em;
+  color: var(--brick);
+  margin: 20px 0 10px;
+  text-transform: uppercase;
+  display: flex; align-items: center; gap: 12px;
+}
+.category-head::before, .category-head::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+.category-head::before { flex: 0 0 20px; }
+</style>
+</head>
+<body>
+
+<div id="nav-mount"></div>
+
+<section class="dash-hero">
+  <div class="container">
+    <div class="eyebrow">ADMIN DASHBOARD · 營運後台</div>
+    <h1>藝饗台南 2.0 · 試辦期儀表板</h1>
+    <div class="sub">即時掌握使用者行為、人流分布、消費轉換與社群擴散成效</div>
+    <div class="dash-bar">
+      <select><option>近 30 天</option><option>近 7 天</option><option>近 90 天</option><option>試辦期至今</option></select>
+      <select><option>全部場域</option><option>林百貨</option><option>孔廟</option><option>赤崁樓</option><option>全美戲院</option><option>安平 × 神農街</option></select>
+      <button>📥 匯出報表</button>
+      <button>🔔 設定通知</button>
+      <span style="color:oklch(75% 0.03 75); font-size:12px; margin-left:auto;">資料更新時間：2026/05/17 06:00</span>
+    </div>
+  </div>
+</section>
+
+<div class="dash-frame">
+  <div class="container">
+
+    <!-- ── 一、CORE KPIs ────────────────────── -->
+    <div class="category-head">CORE KPIS · 核心指標</div>
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-label">試辦期累積人次</div>
+        <div class="kpi-val">4,286 <small>人</small></div>
+        <div class="kpi-trend up">↑ 較上週 +14.2%</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">任務完成率</div>
+        <div class="kpi-val">68 <small>%</small></div>
+        <div class="kpi-trend up">↑ 達 KPI 目標（60%）</div>
+      </div>
+      <div class="kpi-card gold">
+        <div class="kpi-label">使用者滿意度</div>
+        <div class="kpi-val">4.4 <small>/ 5.0</small></div>
+        <div class="kpi-trend up">↑ 達 KPI 目標（4.2）</div>
+      </div>
+      <div class="kpi-card coffee">
+        <div class="kpi-label">合作單位數</div>
+        <div class="kpi-val">24 <small>家</small></div>
+        <div class="kpi-trend up">↑ 達 KPI 目標（20 家）</div>
+      </div>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-label">平均停留時間</div>
+        <div class="kpi-val">+32 <small>%</small></div>
+        <div class="kpi-trend up">↑ 較未參與旅客高</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">消費轉換率</div>
+        <div class="kpi-val">+27 <small>%</small></div>
+        <div class="kpi-trend up">↑ 較未參與旅客高</div>
+      </div>
+      <div class="kpi-card gold">
+        <div class="kpi-label">社群分享</div>
+        <div class="kpi-val">612 <small>則</small></div>
+        <div class="kpi-trend up">↑ #藝饗台南 標籤累積</div>
+      </div>
+      <div class="kpi-card coffee">
+        <div class="kpi-label">DIY 預約</div>
+        <div class="kpi-val">387 <small>場次</small></div>
+        <div class="kpi-trend up">↑ 較上月 +18.5%</div>
+      </div>
+    </div>
+
+    <!-- ── 二、使用者行為 ────────────────────── -->
+    <div class="category-head">USER BEHAVIOR · 使用者行為資料</div>
+    <div class="dash-grid">
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">🗓 每週進入人次趨勢</div>
+          <div class="panel-tabs">
+            <div class="panel-tab active">本週</div>
+            <div class="panel-tab">上週</div>
+          </div>
+        </div>
+        <div class="bar-chart" id="weekly-chart"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">🗺 路線選擇分布</div></div>
+        <div class="donut-wrap">
+          <div class="donut-svg" id="route-donut"></div>
+          <div class="donut-legend" id="route-legend"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-grid">
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">⏰ 每日尖峰時段（人流）</div></div>
+        <div class="line-chart" id="peak-chart"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">📍 熱門場域排行</div></div>
+        <div class="spot-rank" id="hot-spots"></div>
+      </div>
+    </div>
+
+    <!-- ── 三、消費與兌換 ────────────────────── -->
+    <div class="category-head">CONSUMPTION · 消費與兌換</div>
+    <div class="mini-stat-strip">
+      <div class="mini-stat">
+        <div class="mini-stat-num">73<small style="font-size:11px;">%</small></div>
+        <div class="mini-stat-label">合作店家使用率</div>
+      </div>
+      <div class="mini-stat">
+        <div class="mini-stat-num">1,428</div>
+        <div class="mini-stat-label">點數兌換總數</div>
+      </div>
+      <div class="mini-stat">
+        <div class="mini-stat-num">NT$ 86k</div>
+        <div class="mini-stat-label">合作店家銷售金額</div>
+      </div>
+    </div>
+
+    <div class="dash-grid">
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">🎁 熱門兌換獎勵 TOP 5</div></div>
+        <div class="spot-rank" id="rewards-top"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">🏪 合作店家消費分布</div></div>
+        <div style="display:flex; flex-direction:column; gap:10px;" id="partner-list"></div>
+      </div>
+    </div>
+
+    <!-- ── 四、傳播與回饋 ────────────────────── -->
+    <div class="category-head">FEEDBACK · 傳播與回饋</div>
+    <div class="dash-grid">
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">💬 近期使用者回饋</div></div>
+        <div class="feedback-grid" id="feedback-grid"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">📊 滿意度分布</div></div>
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div style="display:flex; align-items:center; gap:10px; font-size:13px;">
+            <span style="width:48px;">5 ★</span>
+            <div style="flex:1; height:14px; background:var(--cream-mid); border-radius:7px; overflow:hidden;">
+              <div style="height:100%; width:62%; background:linear-gradient(to right, var(--gold-deep), var(--gold));"></div>
+            </div>
+            <span style="font-family:serif; font-weight:700; min-width:50px; text-align:right;">62%</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; font-size:13px;">
+            <span style="width:48px;">4 ★</span>
+            <div style="flex:1; height:14px; background:var(--cream-mid); border-radius:7px; overflow:hidden;">
+              <div style="height:100%; width:25%; background:linear-gradient(to right, var(--gold-deep), var(--gold));"></div>
+            </div>
+            <span style="font-family:serif; font-weight:700; min-width:50px; text-align:right;">25%</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; font-size:13px;">
+            <span style="width:48px;">3 ★</span>
+            <div style="flex:1; height:14px; background:var(--cream-mid); border-radius:7px; overflow:hidden;">
+              <div style="height:100%; width:9%; background:var(--brick-light);"></div>
+            </div>
+            <span style="font-family:serif; font-weight:700; min-width:50px; text-align:right;">9%</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; font-size:13px;">
+            <span style="width:48px;">2 ★</span>
+            <div style="flex:1; height:14px; background:var(--cream-mid); border-radius:7px; overflow:hidden;">
+              <div style="height:100%; width:3%; background:var(--brick-light);"></div>
+            </div>
+            <span style="font-family:serif; font-weight:700; min-width:50px; text-align:right;">3%</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; font-size:13px;">
+            <span style="width:48px;">1 ★</span>
+            <div style="flex:1; height:14px; background:var(--cream-mid); border-radius:7px; overflow:hidden;">
+              <div style="height:100%; width:1%; background:var(--brick);"></div>
+            </div>
+            <span style="font-family:serif; font-weight:700; min-width:50px; text-align:right;">1%</span>
+          </div>
+          <div style="background:var(--coffee-dark); color:var(--gold); border-radius:var(--radius-sm); padding:14px; text-align:center; margin-top:10px;">
+            <div style="font-family:serif; font-size:32px; font-weight:700;">4.4 <small style="font-size:14px; opacity:0.7;">/ 5.0</small></div>
+            <div style="font-size:11px; letter-spacing:0.06em; opacity:0.8;">平均滿意度（n=412）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 五、政策成效 ────────────────────── -->
+    <div class="category-head">OUTCOMES · 政策成效</div>
+    <div class="panel">
+      <div class="panel-head"><div class="panel-title">📈 試辦期成效摘要</div></div>
+      <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:14px;">
+        <div style="background:var(--cream); padding:18px; border-radius:var(--radius-sm); border-left:3px solid var(--brick);">
+          <div style="font-size:11px; color:var(--coffee); letter-spacing:0.1em; margin-bottom:6px;">人流引導</div>
+          <div style="font-family:serif; font-size:22px; font-weight:700; color:var(--brick);">+32%</div>
+          <div style="font-size:11px; color:var(--ink-mute); margin-top:4px;">五大主題場域平均人次成長</div>
+        </div>
+        <div style="background:var(--cream); padding:18px; border-radius:var(--radius-sm); border-left:3px solid var(--gold-deep);">
+          <div style="font-size:11px; color:var(--coffee); letter-spacing:0.1em; margin-bottom:6px;">消費串聯</div>
+          <div style="font-family:serif; font-size:22px; font-weight:700; color:var(--brick);">+27%</div>
+          <div style="font-size:11px; color:var(--ink-mute); margin-top:4px;">合作店家消費轉換率提升</div>
+        </div>
+        <div style="background:var(--cream); padding:18px; border-radius:var(--radius-sm); border-left:3px solid var(--green);">
+          <div style="font-size:11px; color:var(--coffee); letter-spacing:0.1em; margin-bottom:6px;">文化參與</div>
+          <div style="font-family:serif; font-size:22px; font-weight:700; color:var(--brick);">2,914</div>
+          <div style="font-size:11px; color:var(--ink-mute); margin-top:4px;">深度文化任務完成人次</div>
+        </div>
+        <div style="background:var(--cream); padding:18px; border-radius:var(--radius-sm); border-left:3px solid var(--coffee);">
+          <div style="font-size:11px; color:var(--coffee); letter-spacing:0.1em; margin-bottom:6px;">回訪意願</div>
+          <div style="font-family:serif; font-size:22px; font-weight:700; color:var(--brick);">78%</div>
+          <div style="font-size:11px; color:var(--ink-mute); margin-top:4px;">使用者表示願意再次參與</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="footer-mount"></div>
+
+<script src="app.js"></script>
+<script>
+document.getElementById('nav-mount').innerHTML = APP.renderNav('dashboard');
+document.getElementById('footer-mount').innerHTML = APP.renderFooter();
+
+// Weekly bar chart
+const weekly = APP.KPI.weeklyTrend;
+const maxW = Math.max(...weekly.map(d => d.v));
+document.getElementById('weekly-chart').innerHTML = weekly.map(d => `
+  <div class="bar-col">
+    <div class="bar-fill" style="height:${(d.v/maxW*100)}%;"><div class="bar-val">${d.v}</div></div>
+    <div class="bar-label">${d.d}</div>
+  </div>
+`).join('');
+
+// Route donut
+const routes = APP.KPI.routeDist;
+const total = routes.reduce((s, r) => s + r.value, 0);
+const colors = ['#7B1E1E', '#A0522D', '#B8860B', '#3B5F3B'];
+let cumAngle = 0;
+const cx = 80, cy = 80, rOut = 70, rIn = 45;
+function polar(angle, radius) {
+  const rad = (angle - 90) * Math.PI / 180;
+  return [cx + radius * Math.cos(rad), cy + radius * Math.sin(rad)];
+}
+const slices = routes.map((r, i) => {
+  const angle = (r.value / total) * 360;
+  const start = cumAngle, end = cumAngle + angle;
+  cumAngle = end;
+  const [x1o, y1o] = polar(start, rOut);
+  const [x2o, y2o] = polar(end, rOut);
+  const [x1i, y1i] = polar(start, rIn);
+  const [x2i, y2i] = polar(end, rIn);
+  const large = angle > 180 ? 1 : 0;
+  return `<path d="M${x1o},${y1o} A${rOut},${rOut} 0 ${large} 1 ${x2o},${y2o} L${x2i},${y2i} A${rIn},${rIn} 0 ${large} 0 ${x1i},${y1i} Z" fill="${colors[i]}" />`;
+}).join('');
+document.getElementById('route-donut').innerHTML = `
+  <svg width="160" height="160" viewBox="0 0 160 160">
+    ${slices}
+    <text x="80" y="76" text-anchor="middle" font-family="Noto Serif TC, serif" font-size="22" font-weight="700" fill="#7B1E1E">${total.toLocaleString()}</text>
+    <text x="80" y="92" text-anchor="middle" font-size="10" fill="#7a7060" letter-spacing="2">總路線數</text>
+  </svg>
+`;
+document.getElementById('route-legend').innerHTML = routes.map((r, i) => `
+  <div class="donut-li">
+    <div class="donut-dot" style="background:${colors[i]};"></div>
+    <div class="donut-li-label">${r.label}</div>
+    <div class="donut-li-val">${r.value.toLocaleString()}</div>
+    <div class="donut-li-pct">${Math.round(r.value/total*100)}%</div>
+  </div>
+`).join('');
+
+// Peak hours line chart
+const peak = APP.KPI.peakHours;
+const maxP = Math.max(...peak.map(p => p.v));
+const w = 100 / (peak.length - 1);
+const points = peak.map((p, i) => `${i*w},${100 - (p.v/maxP*85)}`).join(' ');
+const areaPoints = `0,100 ${points} 100,100`;
+document.getElementById('peak-chart').innerHTML = `
+  <svg class="line-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+    <defs>
+      <linearGradient id="lg" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="#7B1E1E" stop-opacity="0.4"/>
+        <stop offset="100%" stop-color="#7B1E1E" stop-opacity="0.05"/>
+      </linearGradient>
+    </defs>
+    <polygon points="${areaPoints}" fill="url(#lg)"/>
+    <polyline points="${points}" fill="none" stroke="#7B1E1E" stroke-width="0.6"/>
+    ${peak.map((p, i) => `<circle cx="${i*w}" cy="${100 - (p.v/maxP*85)}" r="0.9" fill="#7B1E1E"/>`).join('')}
+  </svg>
+  <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--ink-mute); margin-top:4px;">
+    ${peak.filter((_, i) => i % 2 === 0).map(p => `<span>${p.h}</span>`).join('')}
+  </div>
+`;
+
+// Hot spots
+const hotSpots = APP.KPI.hotSpots.slice().sort((a, b) => b.visits - a.visits);
+const maxV = hotSpots[0].visits;
+document.getElementById('hot-spots').innerHTML = hotSpots.map((sp, i) => `
+  <div class="rank-row">
+    <div class="rank-num ${i === 0 ? 'gold' : ''}">${i+1}</div>
+    <div class="rank-name">${sp.label}</div>
+    <div class="rank-bar-wrap"><div class="rank-bar" style="width:${sp.visits/maxV*100}%;"></div></div>
+    <div class="rank-val">${sp.visits.toLocaleString()}</div>
+  </div>
+`).join('');
+
+// Top rewards
+const topRewards = [
+  { name: '小額折價券', icon: '🎟', value: 412 },
+  { name: '限定明信片', icon: '✉️', value: 308 },
+  { name: 'DIY 折抵券', icon: '🎨', value: 256 },
+  { name: '老街小吃券', icon: '🍜', value: 218 },
+  { name: '通關紀念帆布袋', icon: '👜', value: 134 },
+];
+const maxR = topRewards[0].value;
+document.getElementById('rewards-top').innerHTML = topRewards.map((r, i) => `
+  <div class="rank-row">
+    <div class="rank-num ${i === 0 ? 'gold' : ''}">${i+1}</div>
+    <div class="rank-name">${r.icon} ${r.name}</div>
+    <div class="rank-bar-wrap"><div class="rank-bar" style="width:${r.value/maxR*100}%;"></div></div>
+    <div class="rank-val">${r.value}</div>
+  </div>
+`).join('');
+
+// Partner list
+const partners = [
+  { name: '阿杰溫體牛肉湯', amount: 18400, count: 246 },
+  { name: '莉莉水果店', amount: 14200, count: 198 },
+  { name: '度小月擔仔麵', amount: 11800, count: 174 },
+  { name: '同記安平豆花', amount: 9600, count: 152 },
+  { name: '再發號百年肉粽', amount: 8200, count: 108 },
+];
+document.getElementById('partner-list').innerHTML = partners.map((p, i) => `
+  <div style="display:flex; align-items:center; gap:12px; padding:10px 14px; background:var(--cream); border-radius:var(--radius-sm);">
+    <div style="font-family:serif; font-weight:700; color:var(--brick); width:24px;">${i+1}</div>
+    <div style="flex:1;">
+      <div style="font-family:serif; font-weight:600; font-size:13px;">${p.name}</div>
+      <div style="font-size:11px; color:var(--ink-mute); margin-top:2px;">${p.count} 筆使用</div>
+    </div>
+    <div style="font-family:serif; font-weight:700; color:var(--coffee); font-size:14px;">NT$ ${p.amount.toLocaleString()}</div>
+  </div>
+`).join('');
+
+// Feedback
+document.getElementById('feedback-grid').innerHTML = APP.KPI.recentFeedback.map(f => `
+  <div class="feedback-card">
+    <div class="fb-head">
+      <div>
+        <span class="fb-name">${f.name}</span>
+        <span class="fb-loc">· ${f.loc}</span>
+      </div>
+      <div class="fb-stars">${'★'.repeat(f.rating)}${'☆'.repeat(5-f.rating)}</div>
+    </div>
+    <div class="fb-text">「${f.text}」</div>
+  </div>
+`).join('');
+</script>
+
+</body>
+</html>

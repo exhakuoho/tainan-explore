@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>兌換獎勵 — 藝饗台南 2.0</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.page-hero {
+  background: var(--coffee-dark);
+  color: var(--cream);
+  padding: 56px 0 56px;
+}
+.page-hero h1 { font-family: var(--font-serif); font-size: clamp(28px,4vw,40px); letter-spacing: 0.04em; margin-bottom: 8px; }
+.page-hero .lead { font-size: 14px; color: oklch(82% 0.04 75); max-width: 600px; }
+.page-hero .eyebrow { font-size: 11px; letter-spacing: 0.22em; color: var(--gold); margin-bottom: 12px; }
+
+.points-bar {
+  background: var(--gold);
+  color: var(--coffee-dark);
+  border-radius: var(--radius-md);
+  padding: 18px 24px;
+  margin: 24px 0 0;
+  display: flex; align-items: center; gap: 18px;
+  font-family: var(--font-serif);
+  border: 2px dashed var(--coffee-dark);
+}
+.points-bar-icon { font-size: 28px; }
+.points-bar-text { flex: 1; }
+.points-bar-num { font-size: 28px; font-weight: 900; }
+.points-bar-label { font-size: 12px; opacity: 0.7; letter-spacing: 0.06em; }
+
+/* Tier filter */
+.tier-filter {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+
+/* Reward grid */
+.reward-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+.reward-card {
+  background: white;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-soft);
+  position: relative;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.reward-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.reward-card.unavailable { opacity: 0.55; filter: saturate(0.5); }
+.reward-card.unavailable:hover { transform: none; box-shadow: none; }
+
+.reward-img {
+  height: 140px;
+  background: linear-gradient(135deg, var(--cream-dark), var(--cream-mid));
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 60px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.reward-img.coffee { background: linear-gradient(135deg, oklch(35% 0.04 50), oklch(25% 0.03 45)); color: var(--gold); }
+.reward-img.brick { background: linear-gradient(135deg, var(--brick), var(--brick-deep)); color: var(--cream); }
+.reward-img.gold { background: linear-gradient(135deg, var(--gold), var(--gold-deep)); color: var(--coffee-dark); }
+.reward-img.green { background: linear-gradient(135deg, var(--green), var(--green-deep)); color: var(--cream); }
+
+.reward-cost {
+  position: absolute; top: 10px; right: 10px;
+  background: var(--brick); color: var(--cream);
+  font-family: var(--font-serif); font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  display: flex; align-items: center; gap: 4px;
+  box-shadow: 0 2px 8px oklch(0% 0 0 / 0.25);
+}
+
+.reward-tier-badge {
+  position: absolute; top: 10px; left: 10px;
+  background: oklch(100% 0 0 / 0.92); color: var(--coffee-dark);
+  font-size: 10px; font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 12px;
+  letter-spacing: 0.08em;
+}
+
+.reward-body {
+  padding: 18px 20px 20px;
+  display: flex; flex-direction: column;
+  flex: 1;
+}
+.reward-name {
+  font-family: var(--font-serif);
+  font-size: 16px; font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 6px;
+  letter-spacing: 0.02em;
+  min-height: 2.4em;
+}
+.reward-desc { font-size: 12px; color: var(--ink-mute); line-height: 1.6; flex: 1; margin-bottom: 14px; }
+.reward-cta {
+  width: 100%;
+  font-size: 13px;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.reward-cta.available {
+  background: var(--brick); color: var(--cream);
+}
+.reward-cta.available:hover { background: var(--brick-deep); }
+.reward-cta.disabled {
+  background: var(--cream-mid);
+  color: var(--ink-mute);
+  cursor: not-allowed;
+}
+
+/* Redeemed list */
+.redeemed-list {
+  background: white;
+  border-radius: var(--radius-md);
+  padding: 24px;
+  border: 1px solid var(--border-soft);
+}
+.redeemed-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px dashed var(--border);
+}
+.redeemed-row:last-child { border: none; }
+.redeemed-icon { font-size: 24px; }
+.redeemed-info { flex: 1; }
+.redeemed-name { font-family: var(--font-serif); font-size: 14px; font-weight: 700; }
+.redeemed-time { font-size: 11px; color: var(--ink-mute); margin-top: 2px; }
+.redeemed-coupon {
+  font-family: monospace;
+  background: var(--cream);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--coffee);
+  border: 1px dashed var(--coffee);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--ink-mute);
+  font-size: 14px;
+}
+.empty-state-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+</style>
+</head>
+<body>
+
+<div id="nav-mount"></div>
+
+<section class="page-hero">
+  <div class="container">
+    <div class="eyebrow">REWARDS · 兌換獎勵</div>
+    <h1>把府城記憶帶回家</h1>
+    <p class="lead">完成 NPC 任務累積點數，可兌換合作店家優惠、DIY 折抵、限定明信片與五大主題通關紀念品。</p>
+    <div class="points-bar">
+      <div class="points-bar-icon">🪙</div>
+      <div class="points-bar-text">
+        <div class="points-bar-num" id="my-points">0 點</div>
+        <div class="points-bar-label" id="my-points-sub">尚未開始</div>
+      </div>
+      <a href="task.html" class="btn btn-coffee btn-sm">繼續任務 →</a>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <div class="section-eyebrow">CATALOG · 獎勵清單</div>
+        <h2 class="section-title">十項獎勵任你兌換</h2>
+        <p class="section-subtitle">從 2 點到 20 點，多層級獎勵，符合各種探索深度的旅人。</p>
+      </div>
+    </div>
+
+    <div class="tier-filter" id="tier-filter">
+      <span class="tag active" data-tier="all">全部</span>
+      <span class="tag" data-tier="基礎">基礎 · 2 點</span>
+      <span class="tag" data-tier="小確幸">小確幸 · 5 點</span>
+      <span class="tag" data-tier="進階">進階 · 8 點</span>
+      <span class="tag" data-tier="美食">美食 · 10 點</span>
+      <span class="tag" data-tier="通關">通關 · 15+ 點</span>
+      <span class="tag" data-tier="典藏">典藏 · 20 點</span>
+    </div>
+
+    <div class="reward-grid" id="reward-grid"></div>
+  </div>
+</section>
+
+<!-- Redeemed history -->
+<section class="section section-tinted">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <div class="section-eyebrow">HISTORY · 兌換紀錄</div>
+        <h2 class="section-title" style="font-size:26px;">我已兌換的獎勵</h2>
+      </div>
+    </div>
+    <div class="redeemed-list" id="redeemed-list"></div>
+  </div>
+</section>
+
+<div id="modal-mount"></div>
+<div id="footer-mount"></div>
+
+<script src="app.js"></script>
+<script>
+document.getElementById('nav-mount').innerHTML = APP.renderNav('rewards');
+document.getElementById('footer-mount').innerHTML = APP.renderFooter();
+
+let filterTier = 'all';
+
+function tierClass(t) {
+  return ({基礎:'gold', 小確幸:'brick', 進階:'coffee', 美食:'green', 通關:'brick', 典藏:'coffee'})[t] || 'gold';
+}
+
+function render() {
+  const s = APP.loadState();
+
+  document.getElementById('my-points').textContent = `${s.points} 點`;
+  const next = APP.getNextReward();
+  document.getElementById('my-points-sub').textContent = next
+    ? `下一個獎勵：${next.name}（還差 ${next.cost - s.points} 點）`
+    : '所有獎勵皆已可兌換';
+
+  // Filter
+  const items = APP.REWARDS.filter(r => filterTier === 'all' || r.tier === filterTier);
+  document.getElementById('reward-grid').innerHTML = items.map(r => {
+    const can = s.points >= r.cost;
+    return `
+      <div class="reward-card ${can ? '' : 'unavailable'}">
+        <div class="reward-img ${tierClass(r.tier)}">
+          ${r.icon}
+          <div class="reward-tier-badge">${r.tier}</div>
+          <div class="reward-cost">🪙 ${r.cost} 點</div>
+        </div>
+        <div class="reward-body">
+          <div class="reward-name">${r.name}</div>
+          <div class="reward-desc">${r.desc}</div>
+          <button class="reward-cta ${can ? 'available' : 'disabled'}" ${can ? `onclick="redeem('${r.id}')"` : 'disabled'}>
+            ${can ? '立即兌換 →' : `還差 ${r.cost - s.points} 點`}
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Redeemed history
+  if (s.redeemed.length === 0) {
+    document.getElementById('redeemed-list').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">🎁</div>
+        尚未兌換任何獎勵 · 完成任務累積點數後再來看看
+      </div>
+    `;
+  } else {
+    document.getElementById('redeemed-list').innerHTML = s.redeemed
+      .slice().reverse()
+      .map(r => {
+        const reward = APP.REWARDS.find(x => x.id === r.id);
+        const code = generateCode(r.id, r.time);
+        return `
+          <div class="redeemed-row">
+            <div class="redeemed-icon">${reward?.icon || '🎁'}</div>
+            <div class="redeemed-info">
+              <div class="redeemed-name">${r.name}</div>
+              <div class="redeemed-time">${new Date(r.time).toLocaleString('zh-TW')}</div>
+            </div>
+            <div class="redeemed-coupon">CODE / ${code}</div>
+          </div>
+        `;
+      }).join('');
+  }
+}
+
+function generateCode(id, time) {
+  const t = new Date(time).getTime().toString(36).slice(-5).toUpperCase();
+  return `${id.toUpperCase()}-${t}`;
+}
+
+function redeem(rid) {
+  const r = APP.REWARDS.find(x => x.id === rid);
+  if (!r) return;
+  if (!confirm(`確認兌換「${r.name}」？將扣除 ${r.cost} 點。`)) return;
+  const result = APP.redeemReward(rid);
+  if (result.ok) {
+    showSuccessModal(r);
+    render();
+  } else {
+    alert('點數不足');
+  }
+}
+window.redeem = redeem;
+
+function showSuccessModal(r) {
+  const code = generateCode(r.id, new Date().toISOString());
+  document.getElementById('modal-mount').innerHTML = `
+    <div style="position:fixed; inset:0; z-index:1000; background:oklch(15% 0.01 50 / 0.7); display:flex; align-items:center; justify-content:center; padding:20px;" onclick="if(event.target===this){this.remove()}">
+      <div style="background:white; border-radius:var(--radius-lg); max-width:460px; width:100%; padding:36px; text-align:center; box-shadow:var(--shadow-lg); animation:scaleIn 0.3s ease;">
+        <div style="font-size:60px; margin-bottom:14px;">${r.icon}</div>
+        <div style="font-size:11px; letter-spacing:0.2em; color:var(--brick); margin-bottom:6px;">REDEEMED · 兌換成功</div>
+        <h3 style="font-family:var(--font-serif); font-size:22px; margin-bottom:10px;">${r.name}</h3>
+        <p style="font-size:13px; color:var(--ink-soft); line-height:1.7; margin-bottom:18px;">
+          請出示以下兌換碼至合作店家或服務台即可領取。<br>
+          兌換紀錄已保存至「我的集點 → 兌換紀錄」。
+        </p>
+        <div style="background:var(--cream); border:2px dashed var(--brick); border-radius:var(--radius-sm); padding:18px; margin-bottom:20px;">
+          <div style="font-size:10px; letter-spacing:0.2em; color:var(--coffee); margin-bottom:6px;">兌換碼</div>
+          <div style="font-family:monospace; font-size:24px; font-weight:700; color:var(--brick); letter-spacing:0.1em;">${code}</div>
+        </div>
+        <button class="btn btn-primary btn-block" onclick="this.closest('div[style*=\\'position:fixed\\']').remove()">好的</button>
+      </div>
+    </div>
+  `;
+}
+
+// Filter
+document.querySelectorAll('.tier-filter .tag').forEach(t => {
+  t.addEventListener('click', function() {
+    document.querySelectorAll('.tier-filter .tag').forEach(x => x.classList.remove('active'));
+    this.classList.add('active');
+    filterTier = this.dataset.tier;
+    render();
+  });
+});
+
+render();
+document.addEventListener('state-changed', () => {
+  document.getElementById('nav-mount').innerHTML = APP.renderNav('rewards');
+  render();
+});
+</script>
+
+</body>
+</html>

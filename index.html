@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>藝饗台南 2.0 — 走進府城五種文化記憶</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   藝饗台南 2.0 — 全域樣式
+   米白 / 磚紅 / 深咖啡 / 墨綠 / 暖金
+   ============================================================ */
+
+:root {
+  --cream:        oklch(97% 0.012 80);
+  --cream-mid:    oklch(93% 0.018 75);
+  --cream-dark:   oklch(88% 0.022 72);
+  --brick:        oklch(48% 0.13 32);
+  --brick-deep:   oklch(38% 0.13 28);
+  --brick-light:  oklch(60% 0.12 32);
+  --coffee:       oklch(32% 0.045 50);
+  --coffee-dark:  oklch(22% 0.03 50);
+  --green:        oklch(38% 0.07 145);
+  --green-deep:   oklch(28% 0.06 145);
+  --gold:         oklch(70% 0.12 78);
+  --gold-light:   oklch(82% 0.10 82);
+  --gold-deep:    oklch(58% 0.12 70);
+  --ink:          oklch(18% 0.015 50);
+  --ink-soft:     oklch(38% 0.018 55);
+  --ink-mute:     oklch(55% 0.015 55);
+  --border:       oklch(82% 0.025 70);
+  --border-soft:  oklch(90% 0.018 75);
+
+  --font-serif:   'Noto Serif TC', 'Songti SC', serif;
+  --font-sans:    'Noto Sans TC', 'Helvetica Neue', sans-serif;
+
+  --radius-sm:    4px;
+  --radius-md:    10px;
+  --radius-lg:    18px;
+  --shadow-sm:    0 1px 4px oklch(18% 0.01 55 / 0.10);
+  --shadow-md:    0 4px 16px oklch(18% 0.01 55 / 0.12);
+  --shadow-lg:    0 10px 32px oklch(18% 0.01 55 / 0.16);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-sans);
+  background: var(--cream);
+  color: var(--ink);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+img { max-width: 100%; display: block; }
+a { color: inherit; text-decoration: none; }
+
+/* ── NAV ─────────────────────────────────────────────── */
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  background: oklch(97% 0.012 80 / 0.96);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 40px;
+  height: 72px;
+  gap: 24px;
+}
+.nav-logo {
+  font-family: var(--font-serif);
+  color: var(--brick);
+  display: flex; align-items: center; gap: 12px;
+  flex-shrink: 0;
+}
+.nav-logo-mark {
+  width: 40px; height: 40px;
+  background: var(--brick);
+  color: var(--cream);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 700;
+  font-family: var(--font-serif);
+  position: relative;
+}
+.nav-logo-mark::after {
+  content: ''; position: absolute; inset: -3px;
+  border: 1px solid var(--brick); border-radius: 50%;
+  opacity: 0.4;
+}
+.nav-logo-title { font-size: 16px; font-weight: 700; letter-spacing: 0.04em; line-height: 1.1; }
+.nav-logo-sub { font-size: 10px; color: var(--ink-mute); font-family: var(--font-sans); letter-spacing: 0.1em; }
+.nav-links { display: flex; gap: 28px; list-style: none; flex: 1; justify-content: center; }
+.nav-links a {
+  font-size: 14px; color: var(--ink-soft);
+  letter-spacing: 0.06em;
+  padding-bottom: 4px;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+.nav-links a:hover { color: var(--brick); }
+.nav-links a.active { color: var(--brick); border-bottom-color: var(--brick); font-weight: 500; }
+.nav-points {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--coffee);
+  color: var(--gold-light);
+  padding: 8px 16px;
+  border-radius: 40px;
+  font-size: 13px;
+  border: 1.5px solid var(--gold);
+  transition: all 0.2s;
+}
+.nav-points:hover { background: var(--coffee-dark); transform: translateY(-1px); }
+.nav-points-num { font-size: 16px; font-weight: 700; font-family: var(--font-serif); color: var(--gold); }
+.nav-points-label { font-size: 11px; opacity: 0.85; }
+
+@media (max-width: 1100px) {
+  .nav { padding: 0 20px; gap: 12px; }
+  .nav-logo-title { font-size: 14px; }
+  .nav-logo-sub { display: none; }
+  .nav-links { gap: 16px; }
+  .nav-links a { font-size: 13px; }
+}
+@media (max-width: 760px) { .nav-links { display: none; } }
+
+/* ── BUTTONS ─────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-sans);
+  font-size: 14px; font-weight: 500;
+  letter-spacing: 0.08em;
+  padding: 12px 24px;
+  border-radius: var(--radius-sm);
+  border: none; cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-primary { background: var(--brick); color: var(--cream); }
+.btn-primary:hover { background: var(--brick-deep); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-outline { background: transparent; color: var(--brick); border: 1.5px solid var(--brick); }
+.btn-outline:hover { background: var(--brick); color: var(--cream); }
+.btn-lg { padding: 16px 32px; font-size: 16px; }
+.btn-sm { padding: 8px 16px; font-size: 12px; }
+
+/* ── CONTAINER / SECTION ────────────────────────────── */
+.container { max-width: 1240px; margin: 0 auto; padding: 0 32px; }
+.section { padding: 80px 0; }
+.section-alt { background: white; }
+.section-tinted { background: oklch(95% 0.018 72); }
+
+.section-eyebrow {
+  font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--brick); margin-bottom: 14px;
+  display: inline-flex; align-items: center; gap: 10px;
+  font-weight: 500;
+}
+.section-eyebrow::before {
+  content: ''; display: block; width: 28px; height: 1px; background: var(--gold-deep);
+}
+.section-title {
+  font-family: var(--font-serif);
+  font-size: clamp(26px, 3vw, 38px);
+  font-weight: 700; color: var(--ink);
+  letter-spacing: 0.03em;
+  line-height: 1.25;
+  margin-bottom: 8px;
+}
+.section-subtitle {
+  font-size: 15px; color: var(--ink-soft);
+  margin-bottom: 32px;
+  letter-spacing: 0.02em;
+  max-width: 720px;
+}
+.section-header {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  margin-bottom: 36px; gap: 24px; flex-wrap: wrap;
+}
+
+/* ── HERO ────────────────────────────────────── */
+.hero {
+  position: relative;
+  background: var(--cream);
+  overflow: hidden;
+  padding: 80px 0 100px;
+}
+.hero-inner {
+  position: relative;
+  max-width: 1240px; margin: 0 auto;
+  padding: 0 32px;
+  display: grid; grid-template-columns: 1.1fr 1fr;
+  gap: 48px;
+  align-items: center;
+}
+@media (max-width: 980px) {
+  .hero-inner { grid-template-columns: 1fr; }
+  .hero { padding: 56px 0 64px; }
+}
+.hero-eyebrow {
+  font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--brick);
+  margin-bottom: 18px;
+  display: inline-flex; align-items: center; gap: 10px;
+  font-weight: 500;
+}
+.hero-eyebrow::before {
+  content: ''; width: 36px; height: 1px; background: var(--gold-deep);
+}
+.hero-title {
+  font-family: var(--font-serif);
+  font-size: clamp(36px, 5.5vw, 64px);
+  font-weight: 900;
+  line-height: 1.12;
+  letter-spacing: 0.03em;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.hero-title .version {
+  color: var(--brick);
+  font-size: 0.7em;
+  letter-spacing: 0.06em;
+  display: inline-block;
+  padding: 0 12px;
+  position: relative;
+}
+.hero-title .version::before {
+  content: ''; position: absolute;
+  left: 0; right: 0; top: 50%; height: 2px;
+  background: var(--gold);
+  z-index: -1;
+}
+.hero-subtitle {
+  font-family: var(--font-serif);
+  font-size: clamp(18px, 2vw, 22px);
+  color: var(--coffee);
+  letter-spacing: 0.04em;
+  margin-bottom: 24px;
+}
+.hero-slogan {
+  font-size: 15px;
+  color: var(--ink-soft);
+  line-height: 1.9;
+  margin-bottom: 36px;
+  max-width: 540px;
+}
+.hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+
+/* hero visual */
+.hero-visual {
+  position: relative;
+  height: 460px;
+}
+@media (max-width: 980px) { .hero-visual { height: 360px; } }
+.hero-circle {
+  position: absolute;
+  width: 380px; height: 380px;
+  border-radius: 50%;
+  background: var(--brick);
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column;
+  color: var(--cream);
+  box-shadow: var(--shadow-lg);
+}
+.hero-circle::before {
+  content: ''; position: absolute; inset: 14px;
+  border: 1px solid var(--gold); border-radius: 50%;
+  opacity: 0.5;
+}
+.hero-circle-text-cn {
+  font-family: var(--font-serif);
+  font-size: 56px; font-weight: 900;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  line-height: 1;
+}
+.hero-circle-text-en {
+  font-size: 11px; letter-spacing: 0.4em;
+  color: oklch(85% 0.04 80);
+  margin-top: 12px;
+}
+.hero-stamp {
+  position: absolute;
+  font-family: var(--font-serif);
+  background: var(--gold);
+  color: var(--brick-deep);
+  border: 2px solid var(--brick-deep);
+  width: 78px; height: 78px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.2;
+  transform: rotate(-15deg);
+  box-shadow: var(--shadow-md);
+}
+.hero-stamp-1 { top: 30px; right: 30px; }
+.hero-stamp-2 { bottom: 50px; left: 20px; transform: rotate(12deg); background: var(--coffee); color: var(--gold-light); border-color: var(--gold); }
+@media (max-width: 980px) {
+  .hero-circle { width: 280px; height: 280px; }
+  .hero-circle-text-cn { font-size: 40px; }
+  .hero-stamp { width: 60px; height: 60px; font-size: 11px; }
+}
+
+.hero-bg-pattern {
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(circle at 10% 20%, oklch(70% 0.12 78 / 0.07) 0, transparent 35%),
+    radial-gradient(circle at 90% 80%, oklch(48% 0.13 32 / 0.06) 0, transparent 35%);
+  pointer-events: none;
+}
+
+/* ── 五大主題 ────────────────────────────────────── */
+.themes-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px;
+}
+@media (max-width: 1100px) { .themes-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px)  { .themes-grid { grid-template-columns: 1fr; } }
+.theme-card {
+  position: relative; overflow: hidden;
+  border-radius: var(--radius-md);
+  background: white;
+  border: 1px solid var(--border-soft);
+  height: 320px;
+  display: flex; flex-direction: column;
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+.theme-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+.theme-card-img {
+  height: 170px; position: relative;
+}
+.theme-card-img::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to top, oklch(0% 0 0 / 0.4), transparent 60%);
+}
+.theme-card-num {
+  position: absolute; top: 12px; left: 14px;
+  font-family: var(--font-serif);
+  font-size: 13px; color: white;
+  letter-spacing: 0.1em;
+  z-index: 2;
+}
+.theme-card-era {
+  position: absolute; top: 12px; right: 14px;
+  background: oklch(100% 0 0 / 0.85);
+  color: var(--coffee);
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  z-index: 2;
+  letter-spacing: 0.06em;
+}
+.theme-card-body {
+  padding: 18px 18px 20px;
+  flex: 1;
+  display: flex; flex-direction: column;
+}
+.theme-card-theme {
+  font-size: 10px; letter-spacing: 0.12em;
+  color: var(--gold-deep); text-transform: uppercase;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+.theme-card-name {
+  font-family: var(--font-serif);
+  font-size: 19px; font-weight: 700;
+  color: var(--ink); margin-bottom: 6px;
+  letter-spacing: 0.02em;
+}
+.theme-card-desc {
+  font-size: 12px; color: var(--ink-mute);
+  line-height: 1.55; flex: 1;
+}
+.theme-card-cta {
+  margin-top: 12px;
+  font-size: 12px; font-weight: 500;
+  color: var(--brick); letter-spacing: 0.06em;
+}
+/* placeholder colors per theme */
+.ph-lin      { background: linear-gradient(135deg, oklch(72% 0.08 50), oklch(58% 0.10 45)); }
+.ph-confucius{ background: linear-gradient(135deg, oklch(68% 0.12 25), oklch(50% 0.13 22)); }
+.ph-chihkan  { background: linear-gradient(135deg, oklch(58% 0.11 50), oklch(45% 0.10 48)); }
+.ph-chuanmei { background: linear-gradient(135deg, oklch(55% 0.10 130), oklch(38% 0.08 135)); }
+.ph-street   { background: linear-gradient(135deg, oklch(68% 0.11 80), oklch(52% 0.12 65)); }
+.ph-icon {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 72px;
+  z-index: 1;
+  opacity: 0.6;
+}
+
+/* ── FLOW (使用流程) ────────────────────────────────────── */
+.flow-grid {
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px;
+}
+@media (max-width: 1100px) { .flow-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 600px)  { .flow-grid { grid-template-columns: repeat(2, 1fr); } }
+.flow-step {
+  background: white;
+  border-radius: var(--radius-md);
+  padding: 22px 18px;
+  position: relative;
+  border: 1px solid var(--border-soft);
+}
+.flow-step-num {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 12px;
+}
+.flow-step-num-circle {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--brick);
+  color: var(--cream);
+  font-family: var(--font-serif);
+  font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.flow-step-num-label {
+  font-size: 10px; letter-spacing: 0.16em;
+  color: var(--coffee); text-transform: uppercase;
+}
+.flow-step-icon {
+  font-size: 26px;
+  margin-bottom: 10px;
+}
+.flow-step-title {
+  font-family: var(--font-serif);
+  font-size: 15px; font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.flow-step-desc { font-size: 12px; color: var(--ink-mute); line-height: 1.55; }
+
+/* ── ROUTES preview ────────────────────────────────────── */
+.route-preview-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px;
+}
+@media (max-width: 1000px) { .route-preview-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px)  { .route-preview-grid { grid-template-columns: 1fr; } }
+.route-mini {
+  background: white;
+  border-radius: var(--radius-md);
+  padding: 22px;
+  border: 1px solid var(--border-soft);
+  border-top: 4px solid var(--brick);
+  display: flex; flex-direction: column;
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+.route-mini:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.route-mini-icon { font-size: 28px; margin-bottom: 8px; }
+.route-mini-name { font-family: var(--font-serif); font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+.route-mini-duration { font-size: 11px; color: var(--coffee); letter-spacing: 0.1em; margin-bottom: 14px; }
+.route-mini-spots {
+  font-size: 12px; color: var(--ink-soft);
+  flex: 1;
+  background: var(--cream);
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  line-height: 1.6;
+}
+.route-mini-cta {
+  margin-top: 14px;
+  font-size: 12px; font-weight: 500;
+  color: var(--brick); letter-spacing: 0.08em;
+  display: flex; align-items: center; gap: 4px;
+}
+
+/* ── REWARDS strip ────────────────────────────────────── */
+.rewards-strip {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+}
+@media (max-width: 900px) { .rewards-strip { grid-template-columns: repeat(2, 1fr); } }
+.reward-mini {
+  background: var(--cream);
+  border: 1px dashed var(--gold-deep);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  text-align: center;
+  position: relative;
+}
+.reward-mini-icon { font-size: 32px; margin-bottom: 8px; }
+.reward-mini-cost {
+  position: absolute; top: 10px; right: 10px;
+  background: var(--brick); color: var(--cream);
+  font-size: 11px; font-weight: 700;
+  padding: 3px 9px; border-radius: 20px;
+}
+.reward-mini-name {
+  font-family: var(--font-serif);
+  font-size: 13px; font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 4px; min-height: 2.5em;
+}
+.reward-mini-tier { font-size: 10px; color: var(--coffee); letter-spacing: 0.1em; }
+
+/* ── PARTNERS ────────────────────────────────────── */
+.partner-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 14px;
+}
+@media (max-width: 800px) { .partner-grid { grid-template-columns: repeat(3, 1fr); } }
+.partner-card {
+  background: white;
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  text-align: center;
+  border: 1px solid var(--border-soft);
+}
+.partner-card-icon {
+  width: 44px; height: 44px;
+  margin: 0 auto 8px;
+  background: var(--cream-mid);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-serif);
+  color: var(--coffee);
+  font-size: 14px; font-weight: 700;
+}
+.partner-card-name { font-size: 11px; color: var(--ink-soft); }
+
+/* ── FOOTER ──────────────────────────────────────────── */
+.footer {
+  background: var(--coffee-dark);
+  color: oklch(78% 0.01 70);
+  padding: 64px 40px 32px;
+}
+.footer-inner {
+  max-width: 1240px; margin: 0 auto;
+  display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 48px;
+}
+.footer-logo {
+  font-family: var(--font-serif);
+  font-size: 24px; font-weight: 700;
+  color: var(--gold-light); margin-bottom: 14px;
+  letter-spacing: 0.04em;
+}
+.footer-desc { font-size: 13px; line-height: 1.85; color: oklch(70% 0.01 70); }
+.footer-col h4 {
+  font-family: var(--font-serif);
+  font-size: 14px; font-weight: 600;
+  color: var(--gold-light); margin-bottom: 16px;
+  letter-spacing: 0.06em;
+}
+.footer-col ul { list-style: none; }
+.footer-col ul li { margin-bottom: 8px; }
+.footer-col ul li a {
+  color: oklch(72% 0.01 70);
+  font-size: 13px; transition: color 0.2s;
+}
+.footer-col ul li a:hover { color: var(--gold-light); }
+.footer-bottom {
+  max-width: 1240px; margin: 40px auto 0;
+  padding-top: 24px; border-top: 1px solid oklch(28% 0.01 55);
+  font-size: 12px; color: oklch(55% 0.01 55);
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+}
+@media (max-width: 760px) {
+  .footer-inner { grid-template-columns: 1fr; gap: 28px; }
+  .footer { padding: 48px 24px 24px; }
+}
+
+/* ── ANIMATIONS ──────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hero-inner > * { animation: fadeUp 0.65s ease both; }
+.hero-inner > *:nth-child(2) { animation-delay: 0.15s; }
+
+@keyframes pulse {
+  0%, 100% { transform: translate(-50%,-50%) scale(1); }
+  50%       { transform: translate(-50%,-50%) scale(1.015); }
+}
+.hero-circle { animation: pulse 4s ease-in-out infinite; }
+</style>
+</head>
+<body>
+
+<!-- ── NAV ──────────────────────────────── -->
+<nav class="nav">
+  <a href="index.html" class="nav-logo">
+    <div class="nav-logo-mark">藝</div>
+    <div>
+      <div class="nav-logo-title">藝饗台南 <span style="color:var(--gold);">2.0</span></div>
+      <div class="nav-logo-sub">府城五種文化記憶</div>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html" class="active">首頁</a></li>
+    <li><a href="routes.html">選路線</a></li>
+    <li><a href="explore.html">五大主題</a></li>
+    <li><a href="points.html">我的集點</a></li>
+    <li><a href="rewards.html">兌換</a></li>
+    <li><a href="dashboard.html">後台</a></li>
+  </ul>
+  <a href="points.html" class="nav-points">
+    <span>🪙</span>
+    <span class="nav-points-num" id="pts">0</span>
+    <span class="nav-points-label">點</span>
+  </a>
+</nav>
+
+<!-- ── HERO ──────────────────────────────── -->
+<section class="hero">
+  <div class="hero-bg-pattern"></div>
+  <div class="hero-inner">
+    <div>
+      <div class="hero-eyebrow">FROM TAINAN · 沉浸式體驗計畫</div>
+      <h1 class="hero-title">
+        藝饗台南 <span class="version">2.0</span>
+      </h1>
+      <div class="hero-subtitle">走進府城五種文化記憶的沉浸式體驗計畫</div>
+      <p class="hero-slogan">
+        讓台南的文化被看見、被走進、被參與、被記住。<br>
+        選一條路線、抵達場域、掃描 QR Code 解鎖 NPC 任務，<br>
+        在問答、解謎、手作之中，集點兌換屬於你的府城記憶。
+      </p>
+      <div class="hero-actions">
+        <a href="routes.html" class="btn btn-primary btn-lg">選擇我的路線 ›</a>
+        <a href="explore.html" class="btn btn-outline btn-lg">五大主題場景</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-circle">
+        <div class="hero-circle-text-cn">藝饗台南</div>
+        <div class="hero-circle-text-en">TAINAN · 2026 · CULTURE</div>
+      </div>
+      <div class="hero-stamp hero-stamp-1">府城<br>記憶</div>
+      <div class="hero-stamp hero-stamp-2">五大<br>主題</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 品牌主張 strip ──────────────────────────────── -->
+<section style="background:var(--coffee-dark);color:var(--cream);padding:36px 0;">
+  <div class="container" style="text-align:center;">
+    <div style="font-family:var(--font-serif);font-size:clamp(18px,2.4vw,26px);letter-spacing:0.08em;line-height:1.6;">
+      讓台南的文化　<span style="color:var(--gold);">被看見</span>　·　<span style="color:var(--gold);">被走進</span>　·　<span style="color:var(--gold);">被參與</span>　·　<span style="color:var(--gold);">被記住</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── 五大主題 ──────────────────────────────── -->
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <div class="section-eyebrow">FIVE THEMES · 府城五種文化記憶</div>
+        <h2 class="section-title">五大主題場景</h2>
+        <p class="section-subtitle">每個場域都有一位 NPC 角色，等你掃描 QR Code 解鎖任務、累積點數、收集徽章。</p>
+      </div>
+      <a href="explore.html" class="btn btn-outline btn-sm">查看全部 ›</a>
+    </div>
+    <div class="themes-grid" id="themes-mount"></div>
+  </div>
+</section>
+
+<!-- ── 使用流程 ──────────────────────────────── -->
+<section class="section section-tinted">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <div class="section-eyebrow">HOW IT WORKS · 體驗流程</div>
+        <h2 class="section-title">六步驟　走進府城記憶</h2>
+        <p class="section-subtitle">從選擇路線到完成體驗，每一步都有清晰的指引與獎勵回饋。</p>
+      </div>
+    </div>
+    <div class="flow-grid">
+      <div class="flow-step">
+        <div class="flow-step-num"><div class="flow-step-num-circle">1</div><div class="flow-step-num-label">STEP 01</div></div>
+        <div class="flow-step-icon">🖥</div>
+        <div class="flow-step-title">進入平台</div>
+        <div class="flow-step-desc">瀏覽五大主題、體驗故事、了解參與方式。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num"><div class="flow-step-num-circle">2</div><div class="flow-step-num-label">STEP 02</div></div>
+        <div class="flow-step-icon">🗺</div>
+        <div class="flow-step-title">選擇路線</div>
+        <div class="flow-step-desc">半日文史、懷舊、手作或一日完整線任你挑。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num"><div class="flow-step-num-circle">3</div><div class="flow-step-num-label">STEP 03</div></div>
+        <div class="flow-step-icon">📱</div>
+        <div class="flow-step-title">掃描 QR</div>
+        <div class="flow-step-desc">抵達場域掃 QR Code，解鎖 NPC 任務。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num"><div class="flow-step-num-circle">4</div><div class="flow-step-num-label">STEP 04</div></div>
+        <div class="flow-step-icon">🎭</div>
+        <div class="flow-step-title">互動體驗</div>
+        <div class="flow-step-desc">問答、解謎、拍照、角色扮演或手作體驗。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num"><div class="flow-step-num-circle">5</div><div class="flow-step-num-label">STEP 05</div></div>
+        <div class="flow-step-icon">🪙</div>
+        <div class="flow-step-title">集點兌換</div>
+        <div class="flow-step-desc">累積點數兌換店家優惠、DIY 折抵或紀念品。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num"><div class="flow-step-num-circle">6</div><div class="flow-step-num-label">STEP 06</div></div>
+        <div class="flow-step-icon">📤</div>
+        <div class="flow-step-title">分享紀錄</div>
+        <div class="flow-step-desc">分享徽章與路線成果，形成社群擴散。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 四條路線 ──────────────────────────────── -->
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <div class="section-eyebrow">ROUTES · 四條主題路線</div>
+        <h2 class="section-title">為你規劃，一步入府城</h2>
+        <p class="section-subtitle">依照時間、興趣與同行對象，自由選擇半日或一日的文化體驗路線。</p>
+      </div>
+      <a href="routes.html" class="btn btn-primary btn-sm">立即選路線 ›</a>
+    </div>
+    <div class="route-preview-grid" id="routes-mount"></div>
+  </div>
+</section>
+
+<!-- ── 獎勵預覽 ──────────────────────────────── -->
+<section class="section section-tinted">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <div class="section-eyebrow">REWARDS · 集點兌換獎勵</div>
+        <h2 class="section-title">把府城記憶帶回家</h2>
+        <p class="section-subtitle">完成任務後累積點數，從數位徽章到復古紀念品，多層級獎勵任你挑選。</p>
+      </div>
+      <a href="rewards.html" class="btn btn-outline btn-sm">查看全部 ›</a>
+    </div>
+    <div class="rewards-strip" id="rewards-mount"></div>
+  </div>
+</section>
+
+<!-- ── 合作夥伴 ──────────────────────────────── -->
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-eyebrow" style="margin-bottom:20px;">PARTNERS · 合作單位</div>
+    <div class="partner-grid">
+      <div class="partner-card"><div class="partner-card-icon">市</div><div class="partner-card-name">臺南市政府</div></div>
+      <div class="partner-card"><div class="partner-card-icon">文</div><div class="partner-card-name">文化局</div></div>
+      <div class="partner-card"><div class="partner-card-icon">觀</div><div class="partner-card-name">觀光旅遊局</div></div>
+      <div class="partner-card"><div class="partner-card-icon">林</div><div class="partner-card-name">林百貨</div></div>
+      <div class="partner-card"><div class="partner-card-icon">廟</div><div class="partner-card-name">孔廟文化園區</div></div>
+      <div class="partner-card"><div class="partner-card-icon">戲</div><div class="partner-card-name">全美戲院</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ──────────────────────────────── -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div>
+      <div class="footer-logo">藝饗台南 2.0</div>
+      <div class="footer-desc">走進府城五種文化記憶的沉浸式體驗計畫。<br>讓台南的文化被看見、被走進、被參與、被記住。</div>
+    </div>
+    <div class="footer-col">
+      <h4>五大主題</h4>
+      <ul>
+        <li><a href="spot/lin.html">林百貨 · 摩登生活</a></li>
+        <li><a href="spot/confucius.html">孔廟 · 文教精神</a></li>
+        <li><a href="spot/chihkan.html">赤崁樓 · 歷史轉折</a></li>
+        <li><a href="spot/chuanmei.html">全美戲院 · 庶民娛樂</a></li>
+        <li><a href="spot/street.html">老街 · 街區技藝</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>關於計畫</h4>
+      <ul>
+        <li><a href="routes.html">選擇路線</a></li>
+        <li><a href="points.html">我的集點</a></li>
+        <li><a href="rewards.html">兌換獎勵</a></li>
+        <li><a href="dashboard.html">營運後台</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 藝饗台南趣 · 走進府城</span>
+    <span>合作洽詢 / hello@tainan-explore.tw</span>
+  </div>
+</footer>
+
+<script>
+/* ── inline data (from app.js) ── */
+const SPOTS = [
+  { id:'lin',       name:'林百貨',         era:'日治時期',    theme:'摩登生活', npc:{avatar:'👘'}, desc:'台南最具代表性的歷史百貨，1932 年開幕，是日治時期台灣現代化都市生活的縮影。' },
+  { id:'confucius', name:'孔廟',           era:'明清時期',    theme:'文教精神', npc:{avatar:'🎓'}, desc:'建於明永曆 19 年（1665），台灣第一座孔廟，被譽為「全台首學」。' },
+  { id:'chihkan',   name:'赤崁樓',         era:'荷蘭—明鄭—清', theme:'歷史轉折', npc:{avatar:'⚔️'}, desc:'荷蘭東印度公司建於 1653 年，見證台灣四百年權力轉換與族群交會。' },
+  { id:'chuanmei',  name:'全美戲院',       era:'戰後台南',    theme:'庶民娛樂', npc:{avatar:'🎬'}, desc:'台南最具代表性的老戲院，全台少數仍保留手繪電影看板的二輪戲院。' },
+  { id:'street',    name:'安平老街 × 神農街', era:'清代—當代', theme:'街區技藝', npc:{avatar:'🍬'}, desc:'神農街的文青聚落與安平老街的傳統職人，串連台南最有溫度的街區記憶。' },
+];
+
+const ROUTES = [
+  { id:'history', name:'半日文史線', duration:'3–4 小時', spots:['confucius','chihkan'],                     color:'#7B1E1E', icon:'📜', bonus:3 },
+  { id:'retro',   name:'半日懷舊線', duration:'3–4 小時', spots:['lin','chuanmei'],                          color:'#A0522D', icon:'🎞', bonus:3 },
+  { id:'craft',   name:'半日手作線', duration:'3–4 小時', spots:['street'],                                  color:'#B8860B', icon:'🎋', bonus:2 },
+  { id:'full',    name:'一日完整線', duration:'7–9 小時', spots:['lin','confucius','chihkan','chuanmei','street'], color:'#3B5F3B', icon:'🌅', bonus:5 },
+];
+
+const REWARDS = [
+  { cost:2,  name:'數位徽章 1 枚',     tier:'基礎',  icon:'🏅' },
+  { cost:5,  name:'合作店家小額折價券', tier:'小確幸', icon:'🎟' },
+  { cost:5,  name:'限定明信片 1 張',   tier:'小確幸', icon:'✉️' },
+  { cost:8,  name:'DIY 體驗折抵券',   tier:'進階',  icon:'🎨' },
+  { cost:10, name:'老街小吃兌換券',    tier:'美食',  icon:'🍜' },
+];
+
+/* ── points from localStorage ── */
+function getPoints() {
+  try { return JSON.parse(localStorage.getItem('tainan-2.0-state'))?.points || 0; }
+  catch { return 0; }
+}
+document.getElementById('pts').textContent = getPoints();
+
+/* ── render themes ── */
+const spotNameMap = Object.fromEntries(SPOTS.map(s => [s.id, s.name]));
+document.getElementById('themes-mount').innerHTML = SPOTS.map((s, i) => `
+  <a href="spot/${s.id}.html" class="theme-card" style="text-decoration:none;color:inherit;">
+    <div class="theme-card-img ph-${s.id}" style="position:relative;height:170px;overflow:hidden;">
+      <div class="theme-card-num">No. ${String(i+1).padStart(2,'0')}</div>
+      <div class="theme-card-era">${s.era}</div>
+      <div class="ph-icon">${s.npc.avatar}</div>
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.4),transparent 60%);"></div>
+    </div>
+    <div class="theme-card-body">
+      <div class="theme-card-theme">${s.theme}</div>
+      <div class="theme-card-name">${s.name}</div>
+      <div class="theme-card-desc">${s.desc}</div>
+      <div class="theme-card-cta">解鎖任務 ›</div>
+    </div>
+  </a>
+`).join('');
+
+/* ── render routes ── */
+document.getElementById('routes-mount').innerHTML = ROUTES.map(r => {
+  const names = r.spots.map(id => spotNameMap[id]).join(' → ');
+  return `
+  <div class="route-mini" style="border-top-color:${r.color};">
+    <div class="route-mini-icon">${r.icon}</div>
+    <div class="route-mini-name">${r.name}</div>
+    <div class="route-mini-duration">⏱ ${r.duration} · 加碼 +${r.bonus} 點</div>
+    <div class="route-mini-spots">${names}</div>
+    <a href="routes.html#${r.id}" class="route-mini-cta">選擇路線 →</a>
+  </div>`;
+}).join('');
+
+/* ── render rewards ── */
+document.getElementById('rewards-mount').innerHTML = REWARDS.map(r => `
+  <div class="reward-mini">
+    <div class="reward-mini-cost">${r.cost} 點</div>
+    <div class="reward-mini-icon">${r.icon}</div>
+    <div class="reward-mini-name">${r.name}</div>
+    <div class="reward-mini-tier">${r.tier}</div>
+  </div>
+`).join('');
+</script>
+
+</body>
+</html>
