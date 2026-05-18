@@ -328,6 +328,42 @@
 @keyframes scanmove {
   0%, 100% { top: 12%; } 50% { top: 88%; }
 }
+
+/* ── HERO CAROUSEL ── */
+.hero-carousel {
+  position: absolute; inset: 0;
+  overflow: hidden;
+}
+.hero-carousel-slide {
+  position: absolute; inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+.hero-carousel-slide.active { opacity: 1; }
+.hero-carousel-slide::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to top,
+    oklch(12% 0.02 50 / 0.88),
+    oklch(12% 0.02 50 / 0.35) 50%,
+    oklch(12% 0.02 50 / 0.45));
+}
+.hero-carousel-dots {
+  position: absolute; bottom: 22px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; gap: 8px; z-index: 10;
+}
+.hero-carousel-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: rgba(255,255,255,0.4);
+  cursor: pointer; transition: all 0.3s;
+  border: none; padding: 0;
+}
+.hero-carousel-dot.active {
+  background: var(--gold);
+  width: 24px; border-radius: 4px;
+}
 </style>
 </head>
 <body>
@@ -336,7 +372,9 @@
 
 <!-- HERO -->
 <section class="spot-hero" id="hero">
-  <div class="spot-hero-bg ph" id="hero-bg"></div>
+  <div class="hero-carousel" id="hero-carousel">
+    <!-- slides injected by JS -->
+  </div>
   <div class="spot-hero-content">
     <div class="container">
       <a href="../explore.html" class="back-btn" style="color:var(--cream); margin-bottom:18px;">回到場域列表</a>
@@ -448,9 +486,54 @@ document.title = `${spot.name} · ${spot.theme} — 藝饗台南 2.0`;
 document.getElementById('nav-mount').innerHTML = APP.renderNav('explore', '../');
 document.getElementById('footer-mount').innerHTML = APP.renderFooter('../');
 
-// Hero
-document.getElementById('hero-bg').className = `spot-hero-bg ph ph-${spot.id}`;
-document.getElementById('hero-bg').style.background = spot.palette ? `linear-gradient(135deg, ${spot.palette}, oklch(40% 0.08 50))` : '';
+// Hero Carousel
+const CHIHKAN_PHOTOS = [
+  '../photos/chihkan/chihkan_1.jpg',
+  '../photos/chihkan/chihkan_2.jpg',
+  '../photos/chihkan/chihkan_3.jpg',
+  '../photos/chihkan/chihkan_4.jpg',
+  '../photos/chihkan/chihkan_5.jpg',
+  '../photos/chihkan/chihkan_6.jpg',
+  '../photos/chihkan/chihkan_7.jpg',
+  '../photos/chihkan/chihkan_8.jpg',
+];
+const carousel = document.getElementById('hero-carousel');
+const usedPhotos = spot.id === 'chihkan' ? CHIHKAN_PHOTOS : [];
+if (usedPhotos.length > 0) {
+  // build slides
+  usedPhotos.forEach((src, i) => {
+    const slide = document.createElement('div');
+    slide.className = 'hero-carousel-slide' + (i === 0 ? ' active' : '');
+    slide.style.backgroundImage = `url('${src}')`;
+    carousel.appendChild(slide);
+  });
+  // dots
+  const dotsWrap = document.createElement('div');
+  dotsWrap.className = 'hero-carousel-dots';
+  usedPhotos.forEach((_, i) => {
+    const d = document.createElement('button');
+    d.className = 'hero-carousel-dot' + (i === 0 ? ' active' : '');
+    d.addEventListener('click', () => goSlide(i));
+    dotsWrap.appendChild(d);
+  });
+  carousel.appendChild(dotsWrap);
+  // autoplay
+  let cur = 0;
+  function goSlide(n) {
+    carousel.querySelectorAll('.hero-carousel-slide')[cur].classList.remove('active');
+    dotsWrap.querySelectorAll('.hero-carousel-dot')[cur].classList.remove('active');
+    cur = (n + usedPhotos.length) % usedPhotos.length;
+    carousel.querySelectorAll('.hero-carousel-slide')[cur].classList.add('active');
+    dotsWrap.querySelectorAll('.hero-carousel-dot')[cur].classList.add('active');
+  }
+  setInterval(() => goSlide(cur + 1), 4500);
+} else {
+  // fallback gradient
+  const fallback = document.createElement('div');
+  fallback.className = 'hero-carousel-slide active';
+  fallback.style.background = spot.palette ? `linear-gradient(135deg, ${spot.palette}, oklch(40% 0.08 50))` : 'linear-gradient(135deg, oklch(58% 0.11 50), oklch(45% 0.10 48))';
+  carousel.appendChild(fallback);
+}
 document.getElementById('hero-content').innerHTML = `
   <div class="spot-hero-eyebrow">${spot.theme.toUpperCase()} · 主題場景</div>
   <h1 class="spot-hero-title">${spot.name}</h1>
